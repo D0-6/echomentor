@@ -88,3 +88,49 @@
 .tonal-shift-no-lines {
   background: linear-gradient(180deg, rgba(248,249,255,1) 0%, rgba(239,244,255,1) 100%);
 }
+
+/* Accessibility Implementation */
+
+/* High Contrast: Enforces pure black/white/high-viz levels */
+.acc-high-contrast {
+  --color-surface: #ffffff;
+  --color-background: #ffffff;
+  --color-on-surface: #000000;
+  --color-primary: #000000;
+  --color-secondary-container: #eeeeee;
+  --color-outline: #000000;
+  --color-surface-container: #ffffff;
+}
+
+.acc-high-contrast * {
+  border-color: #000000 !important;
+  text-shadow: none !important;
+}
+
+/* Text Scaling */
+.acc-text-large {
+  font-size: 1.15rem;
+}
+.acc-text-extra-large {
+  font-size: 1.35rem;
+}
+
+.acc-text-large h1, .acc-text-large h2 { font-size: 1.25em; }
+.acc-text-extra-large h1, .acc-text-extra-large h2 { font-size: 1.5em; }
+
+/* Reduced Motion */
+.acc-reduced-motion * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Overlay Base */
+.emergency-blink {
+  animation: emergency-blink 1s infinite;
+}
+
+@keyframes emergency-blink {
+  0% { background-color: #ba1a1a; }
+  50% { background-color: #ffdad6; }
+  100% { background-color: #ba1a1a; }
+}

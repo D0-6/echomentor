@@ -96,6 +96,7 @@ export default function VoiceCoachPage() {
           <VoiceInput 
             onResult={handleVoiceResult} 
             onListeningChange={setIsListening}
+            isListening={isListening}
             disabled={isLoading}
             className="w-full h-full flex items-center justify-center"
             customTrigger={

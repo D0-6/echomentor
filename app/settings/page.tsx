@@ -1,12 +1,16 @@
 "use client"
 
 import * as React from "react"
+import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { cn } from "@/lib/utils"
 
 export default function SettingsPage() {
-  const [highContrast, setHighContrast] = React.useState(true)
-  const [reduceMotion, setReduceMotion] = React.useState(false)
-  const [largeTapTargets, setLargeTapTargets] = React.useState(true)
+  const { 
+    highContrast, setHighContrast, 
+    textScale, setTextScale, 
+    reducedMotion, setReducedMotion 
+  } = useAccessibility()
+  
   const [showGuide, setShowGuide] = React.useState(true)
 
   return (
@@ -65,15 +69,15 @@ export default function SettingsPage() {
                   <p className="text-on-secondary-container">Minimizes animations and sliding effects.</p>
                 </div>
                 <button 
-                  onClick={() => setReduceMotion(!reduceMotion)}
+                  onClick={() => setReducedMotion(!reducedMotion)}
                   className={cn(
                     "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                    reduceMotion ? "bg-primary" : "bg-surface-container-highest"
+                    reducedMotion ? "bg-primary" : "bg-surface-container-highest"
                   )}
                 >
                   <span className={cn(
                     "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
-                    reduceMotion ? "translate-x-7" : "translate-x-1"
+                    reducedMotion ? "translate-x-7" : "translate-x-1"
                   )}></span>
                 </button>
               </div>
@@ -123,21 +127,25 @@ export default function SettingsPage() {
             <div className="space-y-10">
               <div className="flex items-center justify-between gap-6">
                 <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">Large Tap Targets</h4>
-                  <p className="text-on-secondary-container">Makes buttons and links easier to click.</p>
+                  <h4 className="text-lg font-semibold mb-1">Text Size</h4>
+                  <p className="text-on-secondary-container">Makes all words on the screen larger and easier to see.</p>
                 </div>
-                <button 
-                  onClick={() => setLargeTapTargets(!largeTapTargets)}
-                  className={cn(
-                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                    largeTapTargets ? "bg-primary" : "bg-surface-container-highest"
-                  )}
-                >
-                  <span className={cn(
-                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
-                    largeTapTargets ? "translate-x-7" : "translate-x-1"
-                  )}></span>
-                </button>
+                <div className="flex gap-2">
+                  {(["normal", "large", "extra-large"] as const).map((scale) => (
+                    <button
+                      key={scale}
+                      onClick={() => setTextScale(scale)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg border-2 font-bold transition-all",
+                        textScale === scale 
+                          ? "bg-primary text-on-primary border-primary" 
+                          : "border-outline-variant text-on-surface hover:bg-surface-container"
+                      )}
+                    >
+                      {scale === "normal" ? "Normal" : scale === "large" ? "Large" : "Huge"}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center justify-between gap-6">

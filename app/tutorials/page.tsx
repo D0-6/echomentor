@@ -34,11 +34,34 @@ const TUTORIALS = [
   }
 ]
 
+import { TutorialOverlay, TutorialStep } from "@/components/TutorialOverlay"
+
+const WHATSAPP_STEPS: TutorialStep[] = [
+  {
+    title: "Opening WhatsApp",
+    content: "Look for the green bubble icon on your phone screen. Tap it once gently with your finger.",
+  },
+  {
+    title: "Finding a Contact",
+    content: "Tap the magnifying glass icon at the top. Type in the name of the person you want to talk to.",
+  },
+  {
+    title: "Sending a Message",
+    content: "Tap the white box at the bottom. Type your message, then tap the blue circle with the white arrow to send it.",
+  },
+  {
+    title: "You've Got It!",
+    content: "You just learned the basics of WhatsApp. You can come back and practice this anytime you like.",
+  }
+]
+
 export default function TutorialsPage() {
   const [showGuide, setShowGuide] = React.useState(true)
+  const [activeTutorial, setActiveTutorial] = React.useState<TutorialStep[] | null>(null)
   
-  const handleStartTutorial = (title: string) => {
-    alert(`Starting the "${title}" tutorial. We'll go slowly, step-by-step. Get ready!`)
+  const handleStartTutorial = (type: "whatsapp" | "facetime" | "other") => {
+    if (type === "whatsapp") setActiveTutorial(WHATSAPP_STEPS)
+    else alert("This tutorial is coming soon! For now, try our WhatsApp guide.")
   }
 
   return (
@@ -94,7 +117,7 @@ export default function TutorialsPage() {
                 <span className="font-medium text-lg">15 Minutes</span>
               </div>
               <button 
-                onClick={() => handleStartTutorial("Mastering WhatsApp")}
+                onClick={() => handleStartTutorial("whatsapp")}
                 className="bg-primary text-on-primary px-10 py-5 rounded-lg text-lg font-bold transition-all hover:opacity-90 shadow-lg active:scale-95"
               >
                 Start Tutorial
@@ -119,7 +142,7 @@ export default function TutorialsPage() {
             </p>
             <div className="mt-auto pt-6">
               <button 
-                onClick={() => handleStartTutorial("FaceTime Basics")}
+                onClick={() => handleStartTutorial("facetime")}
                 className="w-full bg-secondary-container text-on-secondary-fixed font-bold py-4 rounded-lg hover:bg-secondary-fixed transition-colors text-lg active:scale-95"
               >
                 Start Tutorial
@@ -139,7 +162,7 @@ export default function TutorialsPage() {
               <p className="text-on-surface-variant text-lg">{tut.desc}</p>
             </div>
             <button 
-              onClick={() => handleStartTutorial(tut.title)}
+              onClick={() => handleStartTutorial("other")}
               className="mt-auto text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform text-lg active:scale-95"
             >
               Start Tutorial <span className="material-symbols-outlined">arrow_forward</span>
@@ -195,6 +218,12 @@ export default function TutorialsPage() {
           <span className="material-symbols-outlined text-3xl">support_agent</span>
         </button>
       )}
+
+      <TutorialOverlay 
+        isOpen={activeTutorial !== null}
+        steps={activeTutorial || []}
+        onClose={() => setActiveTutorial(null)}
+      />
     </div>
   )
 }

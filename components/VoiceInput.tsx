@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 interface VoiceInputProps {
   onResult: (text: string) => void
   onListeningChange?: (isListening: boolean) => void
+  isListening?: boolean // New: Allows parent to control state
   disabled?: boolean
   className?: string
   customTrigger?: React.ReactNode
@@ -14,13 +15,24 @@ interface VoiceInputProps {
 export function VoiceInput({ 
   onResult, 
   onListeningChange, 
+  isListening: controlledIsListening,
   disabled, 
   className,
   customTrigger 
 }: VoiceInputProps) {
-  const [isListening, setIsListening] = React.useState(false)
+  const [internalIsListening, setInternalIsListening] = React.useState(false)
+  const isListening = controlledIsListening !== undefined ? controlledIsListening : internalIsListening
+  const setIsListening = controlledIsListening !== undefined ? () => {} : setInternalIsListening
+
   const [error, setError] = React.useState<string | null>(null)
   const recognitionRef = React.useRef<any>(null)
+
+  // Explicitly handle controlled state changes
+  React.useEffect(() => {
+    if (controlledIsListening === false && internalIsListening) {
+      recognitionRef.current?.stop()
+    }
+  }, [controlledIsListening])
 
   React.useEffect(() => {
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition

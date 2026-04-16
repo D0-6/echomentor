@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useAccessibility } from "@/providers/AccessibilityProvider"
 
 const NAV_ITEMS = [
   { name: "AI Coach", href: "/voice-coach", icon: "psychology" },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 ]
 
 export function SideNavBar() {
+  const { setIsEmergencyOpen } = useAccessibility()
   const pathname = usePathname()
 
   return (
@@ -49,7 +51,7 @@ export function SideNavBar() {
 
       <div className="mt-auto">
         <button 
-          onClick={() => alert("Help is on the way! We are notifying your emergency contacts and local assistance now.")}
+          onClick={() => setIsEmergencyOpen(true)}
           className="w-full h-14 bg-primary text-on-primary rounded-xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-95"
         >
           <span className="material-symbols-outlined">emergency</span>
