@@ -4,6 +4,11 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export default function SettingsPage() {
+  const [highContrast, setHighContrast] = React.useState(true)
+  const [reduceMotion, setReduceMotion] = React.useState(false)
+  const [largeTapTargets, setLargeTapTargets] = React.useState(true)
+  const [showGuide, setShowGuide] = React.useState(true)
+
   return (
     <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
       <header className="mb-12">
@@ -40,8 +45,17 @@ export default function SettingsPage() {
                   <h4 className="text-lg font-semibold mb-1">High Contrast</h4>
                   <p className="text-on-secondary-container">Increases color contrast for better readability.</p>
                 </div>
-                <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-primary transition-colors">
-                  <span className="translate-x-7 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"></span>
+                <button 
+                  onClick={() => setHighContrast(!highContrast)}
+                  className={cn(
+                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                    highContrast ? "bg-primary" : "bg-surface-container-highest"
+                  )}
+                >
+                  <span className={cn(
+                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
+                    highContrast ? "translate-x-7" : "translate-x-1"
+                  )}></span>
                 </button>
               </div>
 
@@ -50,8 +64,17 @@ export default function SettingsPage() {
                   <h4 className="text-lg font-semibold mb-1">Reduce Motion</h4>
                   <p className="text-on-secondary-container">Minimizes animations and sliding effects.</p>
                 </div>
-                <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-surface-container-highest transition-colors">
-                  <span className="translate-x-1 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"></span>
+                <button 
+                  onClick={() => setReduceMotion(!reduceMotion)}
+                  className={cn(
+                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                    reduceMotion ? "bg-primary" : "bg-surface-container-highest"
+                  )}
+                >
+                  <span className={cn(
+                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
+                    reduceMotion ? "translate-x-7" : "translate-x-1"
+                  )}></span>
                 </button>
               </div>
             </div>
@@ -103,8 +126,17 @@ export default function SettingsPage() {
                   <h4 className="text-lg font-semibold mb-1">Large Tap Targets</h4>
                   <p className="text-on-secondary-container">Makes buttons and links easier to click.</p>
                 </div>
-                <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-primary transition-colors">
-                  <span className="translate-x-7 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"></span>
+                <button 
+                  onClick={() => setLargeTapTargets(!largeTapTargets)}
+                  className={cn(
+                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                    largeTapTargets ? "bg-primary" : "bg-surface-container-highest"
+                  )}
+                >
+                  <span className={cn(
+                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
+                    largeTapTargets ? "translate-x-7" : "translate-x-1"
+                  )}></span>
                 </button>
               </div>
 
@@ -155,18 +187,33 @@ export default function SettingsPage() {
       </div>
 
       {/* Sticky Mentor Guide */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-2xl border border-outline-variant/15 flex items-center gap-4 max-w-md">
-          <div className="bg-primary-container p-3 rounded-full">
-            <span className="material-symbols-outlined text-on-primary" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+      {showGuide && (
+        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10">
+          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/15 flex items-center gap-4 max-w-md relative overflow-hidden">
+            <div className="bg-primary-container p-3 rounded-full">
+              <span className="material-symbols-outlined text-on-primary" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-on-surface font-semibold">Mentor Guide Active</p>
+              <p className="text-on-surface-variant text-sm">Tap here if you need help navigating this page.</p>
+            </div>
+            <button 
+              onClick={() => setShowGuide(false)}
+              className="absolute top-2 right-2 text-outline hover:text-on-surface transition-colors"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
           </div>
-          <div className="flex-1">
-            <p className="text-on-surface font-semibold">Mentor Guide Active</p>
-            <p className="text-on-surface-variant text-sm">Tap here if you need help navigating this page.</p>
-          </div>
-          <span className="material-symbols-outlined text-outline cursor-pointer">close</span>
         </div>
-      </div>
+      )}
+      {!showGuide && (
+        <button 
+          onClick={() => setShowGuide(true)}
+          className="fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
+        >
+          <span className="material-symbols-outlined text-3xl">smart_toy</span>
+        </button>
+      )}
     </div>
   )
 }

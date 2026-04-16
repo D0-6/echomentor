@@ -12,6 +12,7 @@ export default function VoiceCoachPage() {
   const [isListening, setIsListening] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [lastTranscript, setLastTranscript] = useState("")
+  const [showGuide, setShowGuide] = useState(true)
 
   const handleSpeak = useCallback((text: string) => {
     window.speechSynthesis.cancel()
@@ -166,20 +167,37 @@ export default function VoiceCoachPage() {
 
       {/* Bottom Actions */}
       <div className="fixed bottom-12 right-12 flex flex-col gap-4 items-end">
-        <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.15)] max-w-xs flex flex-col gap-4">
-          <p className="text-on-surface text-sm font-medium">Need to pause? Just say "Pause listening" or click below.</p>
-          <div className="flex gap-2">
-            <button className="flex-1 h-12 bg-secondary-container text-on-secondary-container rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors">
-              <span className="material-symbols-outlined">pause</span>
-              Pause
-            </button>
-            <button className="flex-1 h-12 bg-error-container text-on-error-container rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-80 transition-opacity">
-              <span className="material-symbols-outlined">stop</span>
-              End
+        {showGuide && (
+          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.15)] max-w-xs flex flex-col gap-4 animate-in slide-in-from-right-10 overflow-hidden">
+            <p className="text-on-surface text-sm font-medium">Need to pause? Just say "Pause listening" or click below.</p>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setIsListening(false)}
+                className="flex-1 h-12 bg-secondary-container text-on-secondary-container rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-colors active:scale-95"
+              >
+                <span className="material-symbols-outlined">pause</span>
+                Pause
+              </button>
+              <button 
+                onClick={() => window.location.href = "/"}
+                className="flex-1 h-12 bg-error-container text-on-error-container rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-80 transition-opacity active:scale-95"
+              >
+                <span className="material-symbols-outlined">stop</span>
+                End
+              </button>
+            </div>
+            <button 
+              onClick={() => setShowGuide(false)}
+              className="absolute top-2 right-2 text-on-surface-variant opacity-40 hover:opacity-100"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
             </button>
           </div>
-        </div>
-        <button className="w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+        )}
+        <button 
+          onClick={() => setShowGuide(true)}
+          className="w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+        >
           <span className="material-symbols-outlined text-3xl">help</span>
         </button>
       </div>

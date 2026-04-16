@@ -40,6 +40,8 @@ const DASHBOARD_CARDS = [
 ]
 
 export default function Home() {
+  const [showGuide, setShowGuide] = React.useState(true)
+
   return (
     <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
       {/* Editorial Welcome */}
@@ -154,17 +156,33 @@ export default function Home() {
       </section>
 
       {/* Mentor Guide */}
-      <div className="fixed bottom-10 right-10 z-50">
-        <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/15 flex items-center gap-6 max-w-sm">
-          <div className="w-14 h-14 bg-primary-container rounded-full flex items-center justify-center flex-shrink-0 text-white">
-            <span className="material-symbols-outlined">support_agent</span>
-          </div>
-          <div>
-            <p className="font-bold text-on-surface">Feeling overwhelmed?</p>
-            <p className="text-on-surface-variant text-sm">Tap the "AI Voice Coach" to talk directly with me about anything.</p>
+      {showGuide && (
+        <div className="fixed bottom-10 right-10 z-50 animate-in slide-in-from-right-10">
+          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/15 flex items-center gap-6 max-w-sm relative overflow-hidden">
+            <div className="w-14 h-14 bg-primary-container rounded-full flex items-center justify-center flex-shrink-0 text-white">
+              <span className="material-symbols-outlined">support_agent</span>
+            </div>
+            <div>
+              <p className="font-bold text-on-surface">Feeling overwhelmed?</p>
+              <p className="text-on-surface-variant text-sm">Tap the "AI Voice Coach" to talk directly with me about anything.</p>
+            </div>
+            <button 
+              onClick={() => setShowGuide(false)}
+              className="absolute top-2 right-2 text-on-surface-variant opacity-40 hover:opacity-100"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
           </div>
         </div>
-      </div>
+      )}
+      {!showGuide && (
+        <button 
+          onClick={() => setShowGuide(true)}
+          className="fixed bottom-10 right-10 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
+        >
+          <span className="material-symbols-outlined text-3xl">support_agent</span>
+        </button>
+      )}
     </div>
   )
 }

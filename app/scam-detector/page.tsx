@@ -10,6 +10,7 @@ export default function ScamDetectorPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [riskLevel, setRiskLevel] = useState<"low" | "medium" | "high" | null>(null)
+  const [showGuide, setShowGuide] = useState(true)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -203,21 +204,41 @@ export default function ScamDetectorPage() {
       </section>
 
       {/* Mentor Guide (Signature Component) */}
-      <div className="fixed bottom-10 right-10 z-50 w-80 bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-white">
-            <span className="material-symbols-outlined">support_agent</span>
+      {showGuide && (
+        <div className="fixed bottom-10 right-10 z-50 w-80 bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/20 animate-in slide-in-from-right-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-white">
+              <span className="material-symbols-outlined">support_agent</span>
+            </div>
+            <h5 className="text-[1.125rem] font-bold">Mentor Guide</h5>
           </div>
-          <h5 className="text-[1.125rem] font-bold">Mentor Guide</h5>
+          <p className="text-on-surface-variant text-sm mb-4 leading-relaxed">
+            Unsure how to take a photo of your mail? Just say <strong>"Help me take a photo"</strong> and I'll guide you step-by-step.
+          </p>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => window.location.href = "/voice-coach"}
+              className="flex-1 bg-primary text-on-primary py-2 rounded-lg text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
+            >
+              Ask Guide
+            </button>
+            <button 
+              onClick={() => setShowGuide(false)}
+              className="bg-surface-container px-3 rounded-lg hover:bg-surface-container-high transition-colors active:scale-95"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
         </div>
-        <p className="text-on-surface-variant text-sm mb-4 leading-relaxed">
-          Unsure how to take a photo of your mail? Just say <strong>"Help me take a photo"</strong> and I'll guide you step-by-step.
-        </p>
-        <div className="flex gap-2">
-          <button className="flex-1 bg-primary text-on-primary py-2 rounded-lg text-sm font-bold hover:opacity-90">Ask Guide</button>
-          <button className="bg-surface-container px-3 rounded-lg hover:bg-surface-container-high transition-colors"><span className="material-symbols-outlined text-sm">close</span></button>
-        </div>
-      </div>
+      )}
+      {!showGuide && (
+        <button 
+          onClick={() => setShowGuide(true)}
+          className="fixed bottom-10 right-10 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
+        >
+          <span className="material-symbols-outlined">support_agent</span>
+        </button>
+      )}
     </div>
   )
 }

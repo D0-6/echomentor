@@ -35,6 +35,12 @@ const TUTORIALS = [
 ]
 
 export default function TutorialsPage() {
+  const [showGuide, setShowGuide] = React.useState(true)
+  
+  const handleStartTutorial = (title: string) => {
+    alert(`Starting the "${title}" tutorial. We'll go slowly, step-by-step. Get ready!`)
+  }
+
   return (
     <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
       {/* Editorial Header */}
@@ -87,7 +93,10 @@ export default function TutorialsPage() {
                 <span className="material-symbols-outlined">schedule</span>
                 <span className="font-medium text-lg">15 Minutes</span>
               </div>
-              <button className="bg-primary text-on-primary px-10 py-5 rounded-lg text-lg font-bold transition-all hover:opacity-90 shadow-lg">
+              <button 
+                onClick={() => handleStartTutorial("Mastering WhatsApp")}
+                className="bg-primary text-on-primary px-10 py-5 rounded-lg text-lg font-bold transition-all hover:opacity-90 shadow-lg active:scale-95"
+              >
                 Start Tutorial
               </button>
             </div>
@@ -109,7 +118,10 @@ export default function TutorialsPage() {
               Seeing faces makes all the difference. Learn to video call in three taps.
             </p>
             <div className="mt-auto pt-6">
-              <button className="w-full bg-secondary-container text-on-secondary-fixed font-bold py-4 rounded-lg hover:bg-secondary-fixed transition-colors text-lg">
+              <button 
+                onClick={() => handleStartTutorial("FaceTime Basics")}
+                className="w-full bg-secondary-container text-on-secondary-fixed font-bold py-4 rounded-lg hover:bg-secondary-fixed transition-colors text-lg active:scale-95"
+              >
                 Start Tutorial
               </button>
             </div>
@@ -126,7 +138,10 @@ export default function TutorialsPage() {
               <h3 className="text-2xl font-bold text-on-surface mb-2">{tut.title}</h3>
               <p className="text-on-surface-variant text-lg">{tut.desc}</p>
             </div>
-            <button className="mt-auto text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform text-lg">
+            <button 
+              onClick={() => handleStartTutorial(tut.title)}
+              className="mt-auto text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform text-lg active:scale-95"
+            >
               Start Tutorial <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </article>
@@ -153,18 +168,33 @@ export default function TutorialsPage() {
       </div>
 
       {/* Sticky Mentor Guide */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-2xl border border-outline-variant/15 flex items-center gap-6 max-w-md">
-          <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-on-primary text-3xl">support_agent</span>
+      {showGuide && (
+        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10">
+          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-2xl border border-outline-variant/15 flex items-center gap-6 max-w-md relative overflow-hidden">
+            <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="material-symbols-outlined text-on-primary text-3xl">support_agent</span>
+            </div>
+            <div>
+              <p className="font-bold text-on-surface">Feeling stuck?</p>
+              <p className="text-on-surface-variant">Tap here and I'll walk you through it step-by-step.</p>
+            </div>
+            <button 
+              onClick={() => setShowGuide(false)}
+              className="absolute top-2 right-2 text-on-surface-variant opacity-40 hover:opacity-100"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
           </div>
-          <div>
-            <p className="font-bold text-on-surface">Feeling stuck?</p>
-            <p className="text-on-surface-variant">Tap here and I'll walk you through it step-by-step.</p>
-          </div>
-          <span className="material-symbols-outlined text-on-secondary-container cursor-pointer">close</span>
         </div>
-      </div>
+      )}
+      {!showGuide && (
+        <button 
+          onClick={() => setShowGuide(true)}
+          className="fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
+        >
+          <span className="material-symbols-outlined text-3xl">support_agent</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -48,7 +48,10 @@ export function SideNavBar() {
       </nav>
 
       <div className="mt-auto">
-        <button className="w-full h-14 bg-primary text-on-primary rounded-xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2">
+        <button 
+          onClick={() => alert("Help is on the way! We are notifying your emergency contacts and local assistance now.")}
+          className="w-full h-14 bg-primary text-on-primary rounded-xl font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-95"
+        >
           <span className="material-symbols-outlined">emergency</span>
           Get Immediate Help
         </button>
