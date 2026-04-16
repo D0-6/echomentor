@@ -6,12 +6,14 @@ interface SeniorButtonProps extends ButtonProps {
   icon?: React.ReactNode
 }
 
-export function SeniorButton({ label, icon, className, ...props }: SeniorButtonProps) {
+export function SeniorButton({ label, icon, className, variant, size, ...props }: SeniorButtonProps) {
   return (
     <Button
+      variant={variant}
+      size={size}
       className={cn(
         "h-24 text-3xl font-black rounded-[2.5rem] border-2 px-10 flex items-center justify-center gap-5 transition-all active:scale-95 shadow-xl",
-        "bg-primary text-primary-foreground border-primary/20 hover:bg-primary/95 hover:shadow-primary/30",
+        variant !== "ghost" && "bg-primary text-primary-foreground border-primary/20 hover:bg-primary/95 hover:shadow-primary/30",
         className
       )}
       {...props}

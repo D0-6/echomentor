@@ -2,14 +2,11 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { ShieldAlert, ArrowLeft, Search, MessageSquare, Phone, ChevronRight, Upload, Loader2, AlertTriangle, CheckCircle2, XCircle } from "lucide-react"
-import Link from "next/link"
-import { SeniorButton } from "@/components/SeniorButton"
-import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 export default function ScamDetectorPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [digitalContent, setDigitalContent] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [riskLevel, setRiskLevel] = useState<"low" | "medium" | "high" | null>(null)
@@ -27,13 +24,14 @@ export default function ScamDetectorPage() {
     }
   }
 
-  const analyzeScam = async () => {
-    if (!selectedImage) return
+  const analyzeContent = async (type: "digital" | "physical") => {
     setIsAnalyzing(true)
-    
+    setResult(null)
+    setRiskLevel(null)
+
     const prompt = `
-      Analyze this image (could be a text message, email, or suspicious website screenshot). 
-      Identify if this looks like a scam or fraud targeting seniors. 
+      Analyze this ${type === 'digital' ? 'text message/email content' : 'image of a letter/mail'}.
+      Identify if this looks like a scam or fraud targeting seniors.
       Provide your response in a very patient, encouraging way.
       1. Start with a clear risk assessment: LOW, MEDIUM, or HIGH.
       2. Explain why in simple 6th-grade words.
@@ -41,18 +39,31 @@ export default function ScamDetectorPage() {
     `
 
     try {
-      const response = await fetch("/api/vision", {
+      const endpoint = type === "digital" ? "/api/chat" : "/api/vision"
+      const body = type === "digital" 
+        ? { messages: [{ role: "user", content: `${prompt}\n\nContent: ${digitalContent}` }] }
+        : { imageUrl: selectedImage, prompt }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: selectedImage, prompt }),
+        body: JSON.stringify(body),
       })
 
-      if (!response.ok) throw new Error("Failed to fetch vision response")
+      if (!response.ok) throw new Error("Failed to fetch analysis")
       
-      const data = await response.json()
-      const aiResponse = data.result
+      let aiResponse = ""
+      if (type === "digital") {
+        // Handle streaming for digital text analysis maybe? Or just get the full response.
+        // For simplicity in UI replica, we'll get the full text if not streaming or wait for it.
+        const data = await response.json()
+        aiResponse = data.result
+      } else {
+        const data = await response.json()
+        aiResponse = data.result
+      }
       
-      setResult(aiResponse || "I'm sorry, I couldn't analyze the image properly. Please try again or ask a family member.")
+      setResult(aiResponse)
       
       const lowerResp = aiResponse?.toLowerCase() || ""
       if (lowerResp.includes("high") || lowerResp.includes("scam")) setRiskLevel("high")
@@ -60,109 +71,151 @@ export default function ScamDetectorPage() {
       else setRiskLevel("low")
       
     } catch (error) {
-      console.error("Vision API Error:", error)
-      setResult("I had a little trouble checking this image. For safety, please assume it might be a scam and ask someone you trust.")
+      console.error("Analysis Error:", error)
+      setResult("I had a little trouble checking this. For safety, please assume it might be a scam and ask someone you trust.")
       setRiskLevel("high")
     } finally {
       setIsAnalyzing(false)
     }
   }
 
-  const categories = [
-    { title: "Check a Message", icon: <MessageSquare className="h-10 w-10" />, desc: "Is this text or email real?", accent: "text-blue-500", glow: "bg-blue-500/10" },
-    { title: "Check a Phone Call", icon: <Phone className="h-10 w-10" />, desc: "Who is calling me?", accent: "text-green-500", glow: "bg-green-500/10" },
-    { title: "Common Scams", icon: <Search className="h-10 w-10" />, desc: "Learn what to watch out for.", accent: "text-amber-500", glow: "bg-amber-500/10" },
-  ]
-
   return (
-    <div className="flex-1 flex flex-col p-8 md:p-16 gap-12 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <Link href="/">
-          <SeniorButton label="Back" variant="ghost" className="h-16 text-2xl px-6 border-hidden text-muted-foreground" icon={<ArrowLeft className="h-8 w-8" />} />
-        </Link>
-        <div className="flex items-center gap-5">
-           <div className="p-4 bg-red-500/10 rounded-2xl">
-            <ShieldAlert className="h-12 w-12 text-red-500" />
-          </div>
-          <h2 className="text-5xl font-black text-primary gold-glow">Scam Detector</h2>
-        </div>
-        <div className="w-24"></div>
-      </div>
-
-      <div className="bg-red-500/5 border-2 border-red-500/20 p-12 rounded-[3.5rem] relative overflow-hidden backdrop-blur-sm shadow-xl shadow-red-500/5">
-        <div className="absolute top-0 left-0 w-full h-2 bg-red-500 opacity-20"></div>
-        <h3 className="text-4xl font-black text-red-600 mb-6 flex items-center gap-4">
-          <ShieldAlert className="h-10 w-10" /> STAY SAFE!
-        </h3>
-        <p className="text-3xl font-bold text-foreground leading-relaxed max-w-3xl">
-          If you feel unsafe or a caller is demanding money, hang up immediately and call a loved one.
+    <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
+      {/* Editorial Header */}
+      <header className="mb-16">
+        <h2 className="text-[3.5rem] leading-tight font-bold text-on-surface mb-4 tracking-tight">Scam Detector</h2>
+        <p className="text-[1.125rem] text-on-surface-variant max-w-2xl leading-relaxed">
+          If something feels "off," it probably is. Share any digital message or physical mail with us. We'll analyze it with patience and care to keep you safe.
         </p>
-      </div>
+      </header>
 
-      <div className="bg-card-premium p-12 rounded-[4rem] border-2 border-primary/10 shadow-2xl flex flex-col gap-10">
-        <div className="space-y-4">
-          <h3 className="text-4xl font-black text-primary">Scan a Suspicious Image</h3>
-          <p className="text-2xl text-muted-foreground font-medium">Take a photo of the message or upload a screenshot. EchoMentor will check it for you.</p>
-        </div>
-        <div className="flex flex-col lg:flex-row gap-12">
-          <div className="flex-1">
-            <label className={cn(
-              "flex flex-col items-center justify-center h-[400px] border-4 border-dashed rounded-[3rem] cursor-pointer transition-all overflow-hidden relative group",
-              selectedImage ? "border-primary/40 bg-primary/5" : "border-muted-foreground/20 hover:border-primary/40 hover:bg-primary/5"
-            )}>
-              {selectedImage ? (
-                <img src={selectedImage} alt="Scam Screenshot" className="h-full w-full object-contain" />
-              ) : (
-                <div className="flex flex-col items-center gap-6">
-                  <div className="p-8 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform"><Upload className="h-16 w-16" /></div>
-                  <span className="text-3xl font-black text-primary">Tap to Upload Photo</span>
-                </div>
-              )}
-              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-            </label>
-            {selectedImage && !isAnalyzing && !result && (
-              <SeniorButton label="Check for Scams" className="w-full mt-8 h-24 text-3xl" icon={<Search className="h-10 w-10" />} onClick={analyzeScam} />
-            )}
+      {/* Scanning Options (Two Columns) */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+        {/* Digital Scan Column */}
+        <div className="bg-surface-container-lowest rounded-xl p-10 shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)]">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 bg-surface-container-high rounded-full">
+              <span className="material-symbols-outlined text-on-surface">alternate_email</span>
+            </div>
+            <h3 className="text-[1.75rem] font-bold">Digital Scan</h3>
           </div>
-          <div className="flex-1">
-            <div className={cn(
-              "h-full min-h-[400px] p-8 rounded-[3rem] border-2 flex flex-col items-center justify-center text-center transition-all",
-              riskLevel === "high" ? "bg-red-500/5 border-red-500/20" : 
-              riskLevel === "medium" ? "bg-amber-500/5 border-amber-500/20" :
-              riskLevel === "low" ? "bg-green-500/5 border-green-500/20" : "bg-muted/5 border-muted-foreground/10"
-            )}>
-              {isAnalyzing ? (
-                <div className="flex flex-col items-center gap-6">
-                  <Loader2 className="h-20 w-20 animate-spin text-primary" />
-                  <p className="text-3xl font-black text-primary animate-pulse">Analyzing... Please wait.</p>
-                </div>
-              ) : result ? (
-                <div className="text-left w-full space-y-8 animate-in fade-in slide-in-from-bottom-5">
-                   <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-background shadow-lg border-2 border-inherit">
-                      {riskLevel === "high" && <XCircle className="h-16 w-16 text-red-500" />}
-                      {riskLevel === "medium" && <AlertTriangle className="h-16 w-16 text-amber-500" />}
-                      {riskLevel === "low" && <CheckCircle2 className="h-16 w-16 text-green-500" />}
-                      <div>
-                        <p className="text-xl font-black uppercase tracking-widest opacity-60">Risk Assessment</p>
-                        <p className={cn("text-4xl font-black", riskLevel === "high" ? "text-red-600" : riskLevel === "medium" ? "text-amber-600" : "text-green-600")}>
-                          {riskLevel?.toUpperCase()} RISK
-                        </p>
-                      </div>
-                   </div>
-                   <div className="space-y-4">
-                      <p className="text-2xl font-bold text-muted-foreground">AI Explanation:</p>
-                      <p className="text-3xl font-medium leading-relaxed bg-background/50 p-6 rounded-3xl">{result}</p>
-                   </div>
-                   <SeniorButton label="Try Another Image" variant="ghost" className="h-16 border-dashed" onClick={() => { setSelectedImage(null); setResult(null); setRiskLevel(null); }} />
-                </div>
-              ) : (
-                <div className="text-muted-foreground opacity-40">
-                  <Search className="h-24 w-24 mx-auto mb-6" />
-                  <p className="text-3xl font-black italic">Upload an image to start detection.</p>
-                </div>
-              )}
+          <p className="text-on-surface-variant mb-8 text-[1.125rem]">Paste a suspicious link, email content, or text message below.</p>
+          <div className="space-y-6">
+            <div className="group">
+              <label className="block text-[1.125rem] font-medium mb-3 text-on-surface">Message Content</label>
+              <textarea 
+                className="w-full min-h-[200px] bg-surface-container-high border-none rounded-lg p-6 text-[1.125rem] focus:ring-2 focus:ring-primary-container resize-none" 
+                placeholder="Paste the text here..."
+                value={digitalContent}
+                onChange={(e) => setDigitalContent(e.target.value)}
+              ></textarea>
+            </div>
+            <button 
+              onClick={() => analyzeContent("digital")}
+              disabled={isAnalyzing || !digitalContent.trim()}
+              className="w-full bg-primary text-on-primary py-4 px-8 rounded-lg text-[1.125rem] font-bold transition-all hover:bg-primary-container min-h-[56px] disabled:opacity-50"
+            >
+              {isAnalyzing ? "Analyzing..." : "Analyze Digital Content"}
+            </button>
+          </div>
+        </div>
+
+        {/* Physical Mail Scan Column */}
+        <div className="bg-surface-container rounded-xl p-10 relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 opacity-10">
+            <span className="material-symbols-outlined text-[12rem]" style={{ fontVariationSettings: "'FILL' 1" }}>mail</span>
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-surface-container-highest rounded-full">
+                <span className="material-symbols-outlined text-on-surface">photo_camera</span>
+              </div>
+              <h3 className="text-[1.75rem] font-bold">Physical Mail</h3>
+            </div>
+            <p className="text-on-surface-variant mb-8 text-[1.125rem]">Upload a photo of a letter or use your webcam to show us what you received.</p>
+            <div className="grid grid-cols-1 gap-4">
+              <label className="border-2 border-dashed border-outline-variant rounded-xl h-48 flex flex-col items-center justify-center bg-surface-container-lowest/50 hover:bg-surface-container-lowest transition-colors cursor-pointer relative overflow-hidden">
+                {selectedImage ? (
+                  <img src={selectedImage} alt="Preview" className="h-full w-full object-contain" />
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-4xl mb-2 text-on-secondary-container">upload_file</span>
+                    <span className="text-[1.125rem] font-medium">Click to upload photo</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </label>
+              <button 
+                onClick={() => analyzeContent("physical")}
+                disabled={isAnalyzing || !selectedImage}
+                className="flex items-center justify-center gap-3 w-full bg-secondary-container text-on-secondary-fixed py-4 px-8 rounded-lg text-[1.125rem] font-bold transition-all hover:bg-secondary-fixed min-h-[56px] disabled:opacity-50 shadow-sm"
+              >
+                {isAnalyzing ? "Checking..." : (
+                  <>
+                    <span className="material-symbols-outlined">analytics</span>
+                    Analyze Photo
+                  </>
+                )}
+              </button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Analysis Results Display */}
+      {result && (
+        <section className="mb-20 animate-in slide-in-from-bottom-10 duration-700">
+          <div className="flex items-end justify-between mb-8">
+            <h3 className="text-[1.75rem] font-bold">Analysis Result</h3>
+          </div>
+          <div className="space-y-6">
+            <div className={cn(
+              "rounded-xl p-8 flex flex-col md:flex-row items-start gap-6 border-l-8",
+              riskLevel === "high" ? "bg-error-container border-error" : 
+              riskLevel === "medium" ? "bg-amber-100 border-amber-500" : "bg-surface-container-high border-secondary-fixed-dim"
+            )}>
+              <div className="bg-white/40 p-4 rounded-full shadow-sm">
+                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {riskLevel === "high" ? "warning" : riskLevel === "medium" ? "report_problem" : "check_circle"}
+                </span>
+              </div>
+              <div className="flex-1">
+                <span className="text-xs font-bold tracking-widest uppercase opacity-60">Result: {riskLevel?.toUpperCase()} Risk</span>
+                <h4 className="text-[1.5rem] font-bold mb-4">Assessment Brief</h4>
+                <div className="text-[1.125rem] leading-relaxed whitespace-pre-wrap font-medium">
+                  {result}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Editorial Quote / Insight */}
+      <section className="max-w-4xl border-t border-outline-variant/20 pt-12 mt-auto">
+        <div className="relative pl-12">
+          <span className="absolute left-0 top-0 text-6xl text-primary/10 font-serif leading-none">“</span>
+          <p className="text-[1.75rem] font-headline text-on-surface leading-snug italic">
+            Technology moves fast, but safety moves with intention. We're here to provide the space for you to pause and verify.
+          </p>
+          <cite className="block mt-4 text-[1.125rem] not-italic text-on-surface-variant font-medium">— The EchoMentor Philosophy</cite>
+        </div>
+      </section>
+
+      {/* Mentor Guide (Signature Component) */}
+      <div className="fixed bottom-10 right-10 z-50 w-80 bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/20">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-white">
+            <span className="material-symbols-outlined">support_agent</span>
+          </div>
+          <h5 className="text-[1.125rem] font-bold">Mentor Guide</h5>
+        </div>
+        <p className="text-on-surface-variant text-sm mb-4 leading-relaxed">
+          Unsure how to take a photo of your mail? Just say <strong>"Help me take a photo"</strong> and I'll guide you step-by-step.
+        </p>
+        <div className="flex gap-2">
+          <button className="flex-1 bg-primary text-on-primary py-2 rounded-lg text-sm font-bold hover:opacity-90">Ask Guide</button>
+          <button className="bg-surface-container px-3 rounded-lg hover:bg-surface-container-high transition-colors"><span className="material-symbols-outlined text-sm">close</span></button>
         </div>
       </div>
     </div>

@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SeniorHeader } from "@/components/SeniorHeader";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+import { SideNavBar } from "@/components/SideNavBar";
 
 export const metadata: Metadata = {
   title: "EchoMentor | Your Senior AI Companion",
@@ -21,21 +15,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} font-sans min-h-screen flex flex-col antialiased`}>
+      <head>
+        {/* Material Symbols Outlined */}
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
+          rel="stylesheet" 
+        />
+        {/* Plus Jakarta Sans & Inter (Manual load to avoid next/font/google build issues in some environments) */}
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Inter:wght@300;400;500;600;700;800&display=swap" 
+          rel="stylesheet" 
+        />
+      </head>
+      <body className="font-body min-h-screen flex antialiased bg-surface selection:bg-primary/10">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <SeniorHeader />
-          <main className="flex-1 flex flex-col">
+          <SideNavBar />
+          <main className="ml-80 flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
             {children}
           </main>
-          <footer className="p-8 border-t-4 border-muted text-center text-muted-foreground font-medium">
-            <p className="text-2xl">EchoMentor is here for you. Just ask!</p>
-            <p className="text-lg mt-2 opacity-70">Powered by NVIDIA NIM & Your Trusted Guide</p>
-          </footer>
         </ThemeProvider>
       </body>
     </html>
