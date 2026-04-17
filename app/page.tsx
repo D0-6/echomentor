@@ -2,12 +2,22 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { useAccessibility } from "@/providers/AccessibilityProvider"
 
 export default function Dashboard() {
+  const { windowSize } = useAccessibility()
+  
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+    <div className={cn(
+      "mx-auto space-y-12 pb-32 transition-all duration-500",
+      windowSize.isMobile ? "max-w-full" : "max-w-4xl"
+    )}>
       {/* Editorial Header */}
-      <section className="text-left py-6">
+      <section className={cn(
+        "text-left py-6",
+        windowSize.isMobile ? "px-2" : "px-0"
+      )}>
         <h2 className="editorial-display-lg mb-4 text-on-surface">
           How can I help <span className="text-secondary text-primary">you</span> today?
         </h2>

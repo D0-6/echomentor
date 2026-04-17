@@ -34,7 +34,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="antialiased min-h-screen bg-surface selection:bg-secondary-container">
+      <body className="antialiased min-h-dynamic-screen bg-surface selection:bg-secondary-container overflow-x-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -44,7 +44,7 @@ export default function RootLayout({
           <AccessibilityProvider>
             <SideNavBar />
             <TopAppBar />
-            <main className="flex-1 transition-all duration-300 px-6 py-8 mt-24 pb-32 lg:mt-0 lg:pb-8 lg:ml-80">
+            <main className="flex-1 transition-all duration-300 px-4 md:px-8 lg:px-10 py-6 md:py-10 mt-20 lg:mt-0 pb-32 lg:pb-10 lg:ml-80">
               {children}
             </main>
             <MentorGuide />

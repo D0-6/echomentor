@@ -17,7 +17,7 @@ interface Message {
 }
 
 export default function MasterAssistantPage() {
-  const { voiceCharacterId, voiceSpeed } = useAccessibility()
+  const { voiceCharacterId, voiceSpeed, windowSize } = useAccessibility()
 
   const [messages, setMessages] = React.useState<Message[]>([])
   const [isListening, setIsListening] = React.useState(false)
@@ -142,7 +142,10 @@ export default function MasterAssistantPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto overflow-hidden">
+    <div className={cn(
+      "flex flex-col h-dynamic-screen lg:h-[calc(100dvh-40px)] max-w-4xl mx-auto overflow-hidden transition-all duration-300",
+      windowSize.isMobile ? "px-2" : "px-0"
+    )}>
       
       {/* Editorial Header */}
       <div className="py-4 px-1 border-b border-outline-variant/10 flex items-center justify-between">

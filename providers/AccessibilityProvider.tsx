@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { EmergencyOverlay } from "@/components/EmergencyOverlay"
+import { useWindowSize, WindowSize } from "@/hooks/useWindowSize"
 
 export type TextScale = "normal" | "large" | "extra-large"
 
@@ -13,6 +14,7 @@ interface AccessibilityContextType {
   voiceCharacterId: string
   voiceSpeed: number
   isEmergencyOpen: boolean
+  windowSize: WindowSize
   setHighContrast: (val: boolean) => void
   setTextScale: (val: TextScale) => void
   setReducedMotion: (val: boolean) => void
@@ -33,6 +35,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   const [voiceSpeed, setVoiceSpeed] = React.useState(0.95)
   const [isEmergencyOpen, setIsEmergencyOpen] = React.useState(false)
   const [isLoaded, setIsLoaded] = React.useState(false)
+  
+  const windowSize = useWindowSize()
 
   // Load from localStorage on mount
   React.useEffect(() => {
@@ -85,6 +89,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       voiceCharacterId,
       voiceSpeed,
       isEmergencyOpen,
+      windowSize,
       setHighContrast, 
       setTextScale, 
       setReducedMotion,
