@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { SAFETY_AUDIT_PROMPT } from "@/lib/prompts"
 
 export default function ScamDetectorPage() {
   const [digitalContent, setDigitalContent] = React.useState("")
@@ -35,8 +36,8 @@ export default function ScamDetectorPage() {
         method: "POST",
         body: JSON.stringify({ 
           messages: [
-            { role: "system", content: "You are a senior fraud detection specialist. Analyze the following text for scams, phishing, or fraud. Be very clear and simple. Start your response with a risk assessment: LOW RISK, MEDIUM RISK, or HIGH RISK." },
-            { role: "user", content: digitalContent }
+            { role: "system", content: SAFETY_AUDIT_PROMPT },
+            { role: "user", content: `Please analyze this digital message: ${digitalContent}` }
           ]
         }),
       })
@@ -53,9 +54,9 @@ export default function ScamDetectorPage() {
         setResult(fullContent)
         
         const lowerRes = fullContent.toLowerCase()
-        if (lowerRes.includes("high risk") || lowerRes.includes("scam")) setRiskLevel("high")
-        else if (lowerRes.includes("medium risk") || lowerRes.includes("warning")) setRiskLevel("medium")
-        else if (lowerRes.includes("low risk")) setRiskLevel("low")
+        if (lowerRes.includes("[status]: scam") || lowerRes.includes("high risk")) setRiskLevel("high")
+        else if (lowerRes.includes("[status]: caution") || lowerRes.includes("medium risk")) setRiskLevel("medium")
+        else if (lowerRes.includes("[status]: safe") || lowerRes.includes("low risk")) setRiskLevel("low")
       }
 
     } catch (error) {
@@ -76,7 +77,7 @@ export default function ScamDetectorPage() {
         method: "POST",
         body: JSON.stringify({ 
           image: imageData,
-          prompt: "Identify scams or fraud in this mail/message targeting seniors. Provide a 6th-grade level risk assessment: LOW RISK, MEDIUM RISK, or HIGH RISK and 3 simple steps."
+          prompt: SAFETY_AUDIT_PROMPT
         }),
       })
       
@@ -86,9 +87,9 @@ export default function ScamDetectorPage() {
       setResult(data.analysis)
       
       const lowerRes = data.analysis.toLowerCase()
-      if (lowerRes.includes("high risk") || lowerRes.includes("scam")) setRiskLevel("high")
-      else if (lowerRes.includes("medium risk") || lowerRes.includes("warning")) setRiskLevel("medium")
-      else if (lowerRes.includes("low risk")) setRiskLevel("low")
+      if (lowerRes.includes("[status]: scam") || lowerRes.includes("high risk")) setRiskLevel("high")
+      else if (lowerRes.includes("[status]: caution") || lowerRes.includes("medium risk")) setRiskLevel("medium")
+      else if (lowerRes.includes("[status]: safe") || lowerRes.includes("low risk")) setRiskLevel("low")
 
     } catch (error) {
       setResult("I couldn't read the photo. Please try taking a brighter picture or asking a family member.")

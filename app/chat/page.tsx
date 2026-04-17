@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
 import { speak } from "@/lib/speech"
+import { SAFETY_AUDIT_PROMPT } from "@/lib/prompts"
 
 interface Message {
   id: string
@@ -18,20 +19,42 @@ interface Message {
 export default function MasterAssistantPage() {
   const { voiceCharacterId, voiceSpeed } = useAccessibility()
 
-  const [messages, setMessages] = React.useState<Message[]>([
-    { 
-      id: "1", 
-      role: "assistant", 
-      type: "text", 
-      content: "Hello! I am your EchoMentor Guide. I can help you with anything—just speak to me, or send me a photo or a document to look at." 
-    }
-  ])
+  const [messages, setMessages] = React.useState<Message[]>([])
   const [isListening, setIsListening] = React.useState(false)
   const [interimText, setInterimText] = React.useState("")
   const [isTyping, setIsTyping] = React.useState(false)
   const [inputText, setInputText] = React.useState("")
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Load history from localStorage
+  React.useEffect(() => {
+    const saved = localStorage.getItem("echomentor_chat_history")
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved))
+      } catch (e) {
+        console.error("Failed to load chat history", e)
+      }
+    } else {
+      // Default greeting
+      setMessages([
+        { 
+          id: "1", 
+          role: "assistant", 
+          type: "text", 
+          content: "Hello! I am your EchoMentor Guide. I can help you with anything—just speak to me, or send me a photo or a document to look at." 
+        }
+      ])
+    }
+  }, [])
+
+  // Save history to localStorage
+  React.useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem("echomentor_chat_history", JSON.stringify(messages))
+    }
+  }, [messages])
 
   // Scroll to bottom
   React.useEffect(() => {
@@ -64,7 +87,7 @@ export default function MasterAssistantPage() {
 
       if (type === "image") {
         endpoint = "/api/vision"
-        body = { image: metadata.base64, prompt: "Identify this for a senior user. Is it safe or a scam? Be short." }
+        body = { image: metadata.base64, prompt: SAFETY_AUDIT_PROMPT }
       }
 
       const response = await fetch(endpoint, {
@@ -122,9 +145,23 @@ export default function MasterAssistantPage() {
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto overflow-hidden">
       
       {/* Editorial Header */}
-      <div className="py-4 px-1 border-b border-outline-variant/10">
-        <h2 className="text-3xl font-black text-on-surface">Your <span className="text-primary">Assistant</span></h2>
-        <p className="text-sm font-bold opacity-60 uppercase tracking-widest">Voice • Photo • Document</p>
+      <div className="py-4 px-1 border-b border-outline-variant/10 flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-black text-on-surface">Your <span className="text-primary">Assistant</span></h2>
+          <p className="text-sm font-bold opacity-60 uppercase tracking-widest">Voice • Photo • Document</p>
+        </div>
+        <button 
+          onClick={() => {
+            if (confirm("Clear all messages?")) {
+              setMessages([{ id: "1", role: "assistant", type: "text", content: "Chat cleared. How can I help you now?" }])
+              localStorage.removeItem("echomentor_chat_history")
+            }
+          }}
+          className="w-10 h-10 flex items-center justify-center text-on-surface-variant/40 hover:text-error transition-colors"
+          title="Clear History"
+        >
+          <span className="material-symbols-outlined">delete_sweep</span>
+        </button>
       </div>
 
       {/* Message Feed */}
