@@ -201,9 +201,20 @@ export default function MasterAssistantPage() {
                 msg.content
               )}
             </div>
-            <span className="text-[clamp(0.6rem,1.2vw,0.75rem)] mt-2 font-black uppercase opacity-30 px-[clamp(0.5rem,2vw,1.5rem)]">
-              {msg.role === "user" ? "You" : "EchoMentor"}
-            </span>
+            <div className="flex items-center gap-2 mt-2 px-[clamp(0.5rem,2vw,1.5rem)]">
+              <span className="text-[clamp(0.6rem,1.2vw,0.75rem)] font-black uppercase opacity-30">
+                {msg.role === "user" ? "You" : "EchoMentor"}
+              </span>
+              {msg.role === "assistant" && (
+                <button 
+                  onClick={() => speak(msg.content, voiceCharacterId, voiceSpeed)}
+                  className="w-8 h-8 rounded-full bg-secondary/5 flex items-center justify-center hover:bg-secondary/10 transition-colors"
+                  title="Speak Message"
+                >
+                  <span className="material-symbols-outlined icon-sm text-secondary">volume_up</span>
+                </button>
+              )}
+            </div>
           </div>
         ))}
 

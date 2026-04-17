@@ -130,11 +130,23 @@ export default function VoiceCoachPage() {
               <RichMessageRenderer content={coachTip} />
             </div>
           </div>
-          <div className="mt-6 flex items-center gap-2">
-            <span className={cn("w-[clamp(10px,1.5vw,14px)] h-[clamp(10px,1.5vw,14px)] rounded-full bg-primary", (isListening || isThinking) && "animate-pulse")} />
-            <span className="text-[clamp(0.75rem,1.2vw,0.9rem)] font-bold text-primary uppercase tracking-wider">
-              {isListening ? "Listening..." : isThinking ? "Thinking..." : "Ready"}
-            </span>
+          <div className="mt-6 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={cn("w-[clamp(10px,1.5vw,14px)] h-[clamp(10px,1.5vw,14px)] rounded-full bg-primary", (isListening || isThinking) && "animate-pulse")} />
+              <span className="text-[clamp(0.75rem,2.2vw,0.9rem)] font-bold text-primary uppercase tracking-wider">
+                {isListening ? "Listening..." : isThinking ? "Thinking..." : "Ready"}
+              </span>
+            </div>
+            
+            {coachTip && (
+              <button 
+                onClick={() => speak(coachTip, voiceCharacterId, voiceSpeed)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-md"
+              >
+                <span className="material-symbols-outlined text-sm">volume_up</span>
+                Replay Message
+              </button>
+            )}
           </div>
         </div>
       </div>

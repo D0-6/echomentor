@@ -130,24 +130,28 @@ export function VoiceInput({
     }
   }, []) // Stable initialization
 
-  const toggleListening = () => {
+  const toggleListening = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (isListening) {
       recognitionRef.current?.stop()
     } else {
       if (recognitionRef.current) {
-        recognitionRef.current.start()
+        try {
+          recognitionRef.current.start()
+        } catch (err) {
+          console.error("Manual start failed:", err)
+          setError("Click again to restart the microphone.")
+        }
       }
     }
   }
 
   return (
-    <div 
-      className={cn("flex flex-col items-center gap-4", className)}
-      onClick={toggleListening}
-    >
+    <div className={cn("flex flex-col items-center gap-4", className)}>
       <button
         type="button"
         disabled={disabled}
+        onClick={toggleListening}
         className={cn(
           "relative flex items-center justify-center transition-all chat-icon-btn",
           !customTrigger && "h-24 w-24 rounded-full bg-primary text-primary-foreground hover:scale-110 active:scale-95"
@@ -162,9 +166,12 @@ export function VoiceInput({
       </button>
       
       {error && !customTrigger && (
-        <p className="text-xl font-bold text-red-500 animate-in fade-in slide-in-from-top-2">
-          {error}
-        </p>
+        <div className="bg-error-container text-on-error-container p-4 rounded-2xl border-2 border-error/20 max-w-[280px] animate-in fade-in slide-in-from-top-2">
+          <p className="text-sm font-bold flex items-start gap-2">
+            <span className="material-symbols-outlined icon-sm">warning</span>
+            {error}
+          </p>
+        </div>
       )}
     </div>
   )

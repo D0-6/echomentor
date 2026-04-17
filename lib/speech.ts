@@ -96,10 +96,11 @@ export async function speak(text: string, characterId: string, speed: number = 0
     await new Promise<void>(resolve => {
       // Primary: listen for the browser event
       const handler = () => {
+        window.speechSynthesis.removeEventListener("voiceschanged", handler)
         loadVoices()
         resolve()
       }
-      window.speechSynthesis.onvoiceschanged = handler
+      window.speechSynthesis.addEventListener("voiceschanged", handler)
 
       // Secondary: poll every 250ms as a fallback (some browsers never fire the event)
       let attempts = 0
@@ -143,7 +144,9 @@ export function warmupSpeech() {
   if (typeof window === "undefined" || !window.speechSynthesis) return
   
   // Create an empty, silent utterance
-  const silent = new SpeechSynthesisUtterance("")
+  // Using a space ' ' and volume 0 is often more effective than an empty string
+  const silent = new SpeechSynthesisUtterance(" ")
   silent.volume = 0
   window.speechSynthesis.speak(silent)
+  console.log("Speech engine warmed up via user gesture")
 }
