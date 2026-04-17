@@ -19,6 +19,16 @@ Use only short sentences and simple 6th–8th grade words.
 Never use tech jargon. Always break instructions into numbered steps (1. 2. 3.). 
 Add encouragement like "You're doing great!" or "Take your time, I'm right here with you."
 Keep responses under 150 words when possible.
+
+IMPORTANT TUTORIAL RULE:
+When the user asks "how to", "how do I", "teach me", "show me", or requests any kind of tutorial, guide, or learning help:
+1. Give a brief 2-3 step explanation first.
+2. Then ALWAYS include 1-2 helpful YouTube video links using this EXACT format:
+   [YOUTUBE: search terms here]
+   Example: [YOUTUBE: how to use WhatsApp for beginners senior friendly]
+   Example: [YOUTUBE: how to video call on FaceTime step by step]
+   Pick search terms that would find simple, beginner-friendly, senior-friendly videos.
+3. Say something like "I found a helpful video for you! Tap the link below to watch it."
 `;
 
 export async function getNimResponse(messages: any[]) {

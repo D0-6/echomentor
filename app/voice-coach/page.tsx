@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { VoiceInput } from "@/components/VoiceInput"
+import { RichMessageRenderer } from "@/components/RichMessageRenderer"
 import { cn } from "@/lib/utils"
 
 import { useAccessibility } from "@/providers/AccessibilityProvider"
@@ -25,8 +26,8 @@ export default function VoiceCoachPage() {
     try {
       const character = CHARACTERS.find(c => c.id === voiceCharacterId) || CHARACTERS[0]
       const systemPrompt = character.role === "mentor"
-        ? `You are ${character.name}, a wise and patient mentor. Give 2-3 sentences of encouraging, calm feedback in your unique tone.`
-        : `You are ${character.name}, a kind and tech-savvy grandchild. Give 2-3 sentences of loving, bright feedback to your grandparent in your unique tone.`;
+        ? `You are ${character.name}, a wise and patient mentor. Give 2-3 sentences of encouraging, calm feedback in your unique tone. If the user asks how to do something or requests a tutorial, include a YouTube link using this format: [YOUTUBE: search terms here]. Pick senior-friendly search terms.`
+        : `You are ${character.name}, a kind and tech-savvy grandchild. Give 2-3 sentences of loving, bright feedback to your grandparent in your unique tone. If they ask how to do something or want to learn, include a YouTube link using this format: [YOUTUBE: search terms here]. Pick beginner-friendly search terms.`;
 
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -89,7 +90,7 @@ export default function VoiceCoachPage() {
       </section>
 
       {/* The "Voice Canvas" Layout - Fluid mathematically */}
-      <div className="flex flex-wrap lg:flex-nowrap adaptive-gap items-stretch mb-20 px-1">
+      <div className="flex flex-wrap lg:flex-nowrap adaptive-gap items-stretch px-1 pb-nav lg:pb-0">
         
         {/* Large Transcription Area */}
         <div className="flex-grow bg-surface-container-lowest adaptive-rounded adaptive-p shadow-sm min-h-[clamp(250px,30vw,380px)] flex flex-col justify-center relative overflow-hidden group border border-outline-variant/10">
@@ -125,9 +126,9 @@ export default function VoiceCoachPage() {
           <div>
             <span className="material-symbols-outlined text-primary mb-4 icon-lg" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
             <h3 className="font-headline text-[clamp(1.25rem,2.5vw,1.75rem)] font-bold mb-3">Coach Tip</h3>
-            <p className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container leading-relaxed">
-              {coachTip}
-            </p>
+            <div className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container leading-relaxed">
+              <RichMessageRenderer content={coachTip} />
+            </div>
           </div>
           <div className="mt-6 flex items-center gap-2">
             <span className={cn("w-[clamp(10px,1.5vw,14px)] h-[clamp(10px,1.5vw,14px)] rounded-full bg-primary", (isListening || isThinking) && "animate-pulse")} />
@@ -139,7 +140,7 @@ export default function VoiceCoachPage() {
       </div>
 
       {/* Hero Microphone Control (Tactile Target) */}
-      <div className="flex flex-col items-center justify-center gap-[clamp(1.5rem,4vw,3rem)] pb-20">
+      <div className="flex flex-col items-center justify-center gap-[clamp(1.5rem,4vw,3rem)] pb-nav lg:pb-16">
         <div className="relative">
           <button 
             onClick={() => {

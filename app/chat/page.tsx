@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { VoiceInput } from "@/components/VoiceInput"
+import { RichMessageRenderer } from "@/components/RichMessageRenderer"
 import { cn } from "@/lib/utils"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
@@ -194,7 +195,11 @@ export default function MasterAssistantPage() {
                   <span className="text-[clamp(0.75rem,1.5vw,0.9rem)] font-bold uppercase tracking-tight">File: {msg.metadata?.name}</span>
                 </div>
               )}
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <RichMessageRenderer content={msg.content} />
+              ) : (
+                msg.content
+              )}
             </div>
             <span className="text-[clamp(0.6rem,1.2vw,0.75rem)] mt-2 font-black uppercase opacity-30 px-[clamp(0.5rem,2vw,1.5rem)]">
               {msg.role === "user" ? "You" : "EchoMentor"}

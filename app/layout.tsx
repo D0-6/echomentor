@@ -44,7 +44,7 @@ export default function RootLayout({
           <AccessibilityProvider>
             <SideNavBar />
             <TopAppBar />
-            <main className="flex-1 transition-all duration-300 adaptive-p mt-[clamp(4.5rem,8vw,5.5rem)] lg:mt-0 pb-32 lg:pb-10 lg:ml-[clamp(18rem,25vw,22rem)]">
+            <main className="flex-1 transition-all duration-300 adaptive-p mt-[clamp(4.5rem,8vw,5.5rem)] lg:mt-0 pb-nav lg:ml-[clamp(18rem,25vw,22rem)]">
               {children}
             </main>
             <MentorGuide />

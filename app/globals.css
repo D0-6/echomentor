@@ -220,6 +220,13 @@
   }
 }
 
+/* ─── Mobile Navigation Safe Area ───────────────────────────── */
+/* The mobile bottom nav is ~80px (5rem) tall.
+   Every page must clear this so no content is hidden behind it. */
+:root {
+  --mobile-nav-height: 5rem;
+}
+
 @layer utilities {
   .adaptive-p {
     /* Padding scales mathematically from 16px to 64px */
@@ -233,22 +240,55 @@
     /* Border radius scales mathematically */
     border-radius: clamp(1.5rem, 4vw, 3rem);
   }
+
+  /* 
+   * NAVIGATION-SAFE HEIGHT: Chat page uses this so it fills the screen 
+   * but stops ABOVE the mobile nav bar. On large screens (lg+) the nav 
+   * is hidden, so we use 100dvh normally.
+   */
   .h-dynamic-screen {
-    height: 100dvh;
+    height: calc(100dvh - var(--mobile-nav-height));
   }
+  @media (min-width: 1024px) {
+    .h-dynamic-screen {
+      height: 100dvh;
+    }
+  }
+
   .min-h-dynamic-screen {
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--mobile-nav-height));
   }
+  @media (min-width: 1024px) {
+    .min-h-dynamic-screen {
+      min-height: 100dvh;
+    }
+  }
+
   /* Fluid container width */
   .fluid-container {
     width: min(92%, 1440px);
     margin-inline: auto;
   }
+
+  /* Padding that clears the mobile bottom nav bar */
+  .pb-nav {
+    padding-bottom: var(--mobile-nav-height);
+  }
+  @media (min-width: 1024px) {
+    .pb-nav {
+      padding-bottom: 2.5rem;
+    }
+  }
 }
 
 @layer utilities {
   .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--mobile-nav-height));
+  }
+  @media (min-width: 1024px) {
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
   }
 }
 
