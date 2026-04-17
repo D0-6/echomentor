@@ -53,8 +53,11 @@
   --color-secondary: #505f76;
   --color-on-tertiary-container: #ef4444;
 
+  /* Mobile Overhaul Tokens */
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
   --radius-full: 9999px;
 
   --font-headline: "Plus Jakarta Sans", sans-serif;
@@ -93,18 +96,86 @@
 
 /* High Contrast: Enforces pure black/white/high-viz levels */
 .acc-high-contrast {
-  --color-surface: #ffffff;
-  --color-background: #ffffff;
-  --color-on-surface: #000000;
-  --color-primary: #000000;
-  --color-secondary-container: #eeeeee;
-  --color-outline: #000000;
-  --color-surface-container: #ffffff;
+  --color-surface: #ffffff !important;
+  --color-background: #ffffff !important;
+  --color-on-surface: #000000 !important;
+  --color-primary: #000000 !important;
+  --color-secondary-container: #ffff00 !important;
+  --color-on-secondary-container: #000000 !important;
+  --color-outline: #000000 !important;
+  --color-surface-container: #ffffff !important;
+  --color-surface-container-low: #ffffff !important;
+  --color-surface-container-lowest: #ffffff !important;
 }
 
-.acc-high-contrast * {
+.acc-high-contrast body, 
+.acc-high-contrast main,
+.acc-high-contrast .bg-surface,
+.acc-high-contrast .bg-background {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Ensure borders are visible */
+.acc-high-contrast *:not(.material-symbols-outlined) {
   border-color: #000000 !important;
+}
+
+/* Specific Toggle/Button behavior in High Contrast */
+.acc-high-contrast .bg-primary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.acc-high-contrast .bg-outline-variant,
+.acc-high-contrast .bg-\[\#c6c6cd\] {
+  background-color: #ffffff !important;
+  border: 4px solid #000000 !important;
+}
+
+/* Handle the little white circles inside toggles */
+.acc-high-contrast .bg-white.rounded-full.shadow-md {
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* When the toggle is ON (bg-primary), make the circle WHITE for contrast */
+.acc-high-contrast .bg-primary .bg-white.rounded-full.shadow-md {
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.acc-high-contrast .toggle-check {
+  color: #000000 !important;
+}
+
+.acc-high-contrast button {
+  border: 4px solid #000000 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.acc-high-contrast button.chat-icon-btn {
+  border: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+.acc-high-contrast button.chat-icon-btn * {
+  font-size: 2rem !important; /* Make the icons slightly larger to compensate for lack of background */
+}
+
+/* Ensure the send/mic buttons (which might use bg-primary) don't get the square box */
+.acc-high-contrast button.chat-icon-btn.bg-primary,
+.acc-high-contrast .chat-icon-btn .bg-primary {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+}
+
+.acc-high-contrast *:not(button):not(.bg-primary) {
   text-shadow: none !important;
+  box-shadow: none !important;
 }
 
 /* Text Scaling */
@@ -122,6 +193,28 @@
 .acc-reduced-motion * {
   animation: none !important;
   transition: none !important;
+}
+
+/* Waveform animation for Voice Coach */
+.waveform-bar {
+  width: 4px;
+  background-color: var(--color-on-surface);
+  border-radius: 2px;
+  transition: height 0.2s ease-in-out;
+}
+
+.editorial-display-lg {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  font-size: 3.5rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* Overlay Base */

@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils"
 
 interface VoiceInputProps {
   onResult: (text: string) => void
+  onInterimResult?: (text: string) => void
   onListeningChange?: (isListening: boolean) => void
-  isListening?: boolean // New: Allows parent to control state
+  isListening?: boolean
   disabled?: boolean
   className?: string
   customTrigger?: React.ReactNode
@@ -14,6 +15,7 @@ interface VoiceInputProps {
 
 export function VoiceInput({ 
   onResult, 
+  onInterimResult,
   onListeningChange, 
   isListening: controlledIsListening,
   disabled, 
@@ -29,7 +31,15 @@ export function VoiceInput({
 
   // Explicitly handle controlled state changes
   React.useEffect(() => {
-    if (controlledIsListening === false && internalIsListening) {
+    if (controlledIsListening === true && !internalIsListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start()
+        } catch (e) {
+          // Ignore if already started
+        }
+      }
+    } else if (controlledIsListening === false && internalIsListening) {
       recognitionRef.current?.stop()
     }
   }, [controlledIsListening])
@@ -39,8 +49,8 @@ export function VoiceInput({
     
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition()
-      recognition.continuous = false
-      recognition.interimResults = false
+      recognition.continuous = false // Auto-stop on pause for clear conversational turns
+      recognition.interimResults = true
       recognition.lang = 'en-US'
 
       recognition.onstart = () => {
@@ -50,15 +60,33 @@ export function VoiceInput({
       }
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
-        onResult(transcript)
-        setIsListening(false)
-        onListeningChange?.(false)
+        let interimTranscript = ""
+        let finalTranscript = ""
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
+          }
+        }
+
+        if (finalTranscript) {
+          onResult(finalTranscript)
+        }
+        
+        if (interimTranscript && onInterimResult) {
+          onInterimResult(interimTranscript)
+        }
       }
 
       recognition.onerror = (event: any) => {
-        console.error("Speech Recognition Error:", event.error)
-        setError("I didn't quite catch that. Try again?")
+        if (event.error !== 'no-speech') {
+          console.error("Speech Recognition Error:", event.error)
+          setError("I didn't quite catch that. Try again?")
+        }
+        // Even on 'no-speech', we shouldn't necessarily stop listening if continuous is true
+        // But for predictable state, we stop it and let user tap again if needed.
         setIsListening(false)
         onListeningChange?.(false)
       }
@@ -93,7 +121,7 @@ export function VoiceInput({
         type="button"
         disabled={disabled}
         className={cn(
-          "relative flex items-center justify-center transition-all",
+          "relative flex items-center justify-center transition-all chat-icon-btn",
           !customTrigger && "h-24 w-24 rounded-full bg-primary text-primary-foreground hover:scale-110 active:scale-95"
         )}
         aria-label={isListening ? "Stop Listening" : "Start Listening"}

@@ -3,11 +3,16 @@ import "./globals.css";
 import * as React from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SideNavBar } from "@/components/SideNavBar";
+import { TopAppBar } from "@/components/TopAppBar";
+import { MobileNavBar } from "@/components/MobileNavBar";
+import { MentorGuide } from "@/components/MentorGuide";
 import { AccessibilityProvider } from "@/providers/AccessibilityProvider";
 
+import { BrightnessOverlay } from "@/components/BrightnessOverlay";
+
 export const metadata: Metadata = {
-  title: "EchoMentor | Your Senior AI Companion",
-  description: "A patient, high-contrast, and easy-to-use AI dashboard designed specifically for seniors.",
+  title: "EchoMentor | Your Senior Tech Guide",
+  description: "Simplifying digital connection for seniors with patience and empathy.",
 };
 
 export default function RootLayout({
@@ -29,20 +34,24 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="font-body min-h-screen flex antialiased bg-surface selection:bg-primary/10 transition-colors duration-300">
-        <AccessibilityProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
+      <body className="antialiased min-h-screen bg-surface selection:bg-secondary-container">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AccessibilityProvider>
             <SideNavBar />
-            <main className="ml-80 flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
+            <TopAppBar />
+            <main className="flex-1 transition-all duration-300 px-6 py-8 mt-24 pb-32 lg:mt-0 lg:pb-8 lg:ml-80">
               {children}
             </main>
-          </ThemeProvider>
-        </AccessibilityProvider>
+            <MentorGuide />
+            <MobileNavBar />
+            <BrightnessOverlay />
+          </AccessibilityProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

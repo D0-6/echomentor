@@ -1,229 +1,119 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-
-const TUTORIALS = [
-  {
-    title: "Mastering WhatsApp",
-    desc: "Learn how to send photos, voice messages, and make video calls to your grandchildren. No technical jargon, just simple steps.",
-    duration: "15 Minutes",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCTYGEJc0hISJ2aCawgY64LYrK25hht7f3SXhsFwQCzXUL7ezFm2cuU1ESeaDMoR3VX4EDUmpTP2HEvcm7TLCnWjJvx5q7M_RqT-T7bckym5DTQnX7-WbxrpcsQKwm87nBClf9QojwVki035uthKtWn_AsfecyhGg1w4i6-9EpjSXJYq-lSjIwGnFt8USXgkw9AlxCPyMefmPAnejxdoLnogvZKQFycoZCR4yIaTMH8HK79zVLxQQlCHUiKbodm54t2SvFRgfZXvTw",
-    featured: true,
-    tag: "Most Popular"
-  },
-  {
-    title: "FaceTime Basics",
-    desc: "Seeing faces makes all the difference. Learn to video call in three taps.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBcT3YSbaOjDAQBFUzvefD1MG11dzbd0vUQ4ejdIaiPRdPpmc-8-fLKrIv4uSjPNiWP9hwWcZJiEXCpq4g10MbA4fBx0r0DSeTASifUwyQ4_Q2hqCMGhshnZgEyz7nW_4wo9ZD7_jA0Zdmt3pjOAc7c3x8dBsyXI84mVd2wsdHdnmV-MYBEH9zsda8wG9gWUWOTmwVDCvi-MxgRfo1i8QJZ4-DPK5tDB158fAf1lD7hIG7u1M1FeGk7tgL1fH0Rr47PomoQB3ejMVQ"
-  },
-  {
-    title: "iPhone Photos",
-    desc: "Organize your memories and share albums with family.",
-    icon: "photo_library"
-  },
-  {
-    title: "Online Groceries",
-    desc: "Have your shopping delivered right to your front door safely.",
-    icon: "shopping_cart"
-  },
-  {
-    title: "Password Safety",
-    desc: "Easy tricks to remember your passwords and keep hackers away.",
-    icon: "security"
-  }
-]
-
-import { TutorialOverlay, TutorialStep } from "@/components/TutorialOverlay"
-
-const WHATSAPP_STEPS: TutorialStep[] = [
-  {
-    title: "Opening WhatsApp",
-    content: "Look for the green bubble icon on your phone screen. Tap it once gently with your finger.",
-  },
-  {
-    title: "Finding a Contact",
-    content: "Tap the magnifying glass icon at the top. Type in the name of the person you want to talk to.",
-  },
-  {
-    title: "Sending a Message",
-    content: "Tap the white box at the bottom. Type your message, then tap the blue circle with the white arrow to send it.",
-  },
-  {
-    title: "You've Got It!",
-    content: "You just learned the basics of WhatsApp. You can come back and practice this anytime you like.",
-  }
-]
+import { TutorialOverlay } from "@/components/TutorialOverlay"
 
 export default function TutorialsPage() {
-  const [showGuide, setShowGuide] = React.useState(true)
-  const [activeTutorial, setActiveTutorial] = React.useState<TutorialStep[] | null>(null)
-  
-  const handleStartTutorial = (type: "whatsapp" | "facetime" | "other") => {
-    if (type === "whatsapp") setActiveTutorial(WHATSAPP_STEPS)
-    else alert("This tutorial is coming soon! For now, try our WhatsApp guide.")
-  }
+  const [activeTutorial, setActiveTutorial] = React.useState<string | null>(null)
 
   return (
-    <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
-      {/* Editorial Header */}
-      <header className="mb-20">
-        <div className="flex flex-col gap-10">
-          <div className="space-y-4">
-            <h2 className="text-[3.5rem] leading-tight font-bold text-on-surface tracking-tight">The Library of Wisdom</h2>
-            <p className="text-[1.125rem] text-on-surface-variant max-w-2xl leading-relaxed">
-              Step-by-step guides crafted with patience. No rush, no pressure—just clear paths to mastering the tools that connect you to your loved ones.
-            </p>
-          </div>
-          
-          {/* Prominent Search Bar */}
-          <div className="relative max-w-3xl">
-            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-on-secondary-container">search</span>
-            </div>
-            <input 
-              className="w-full bg-surface-container-high border-none h-20 pl-16 pr-8 rounded-xl text-xl font-medium focus:ring-4 focus:ring-secondary-container transition-all placeholder:text-on-secondary-container/60 shadow-sm" 
-              placeholder="What would you like to learn today? (e.g., 'How to use WhatsApp')" 
-              type="text" 
-            />
-          </div>
+    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+       {/* Editorial Header */}
+      <section className="text-left py-6">
+        <h2 className="editorial-display-lg mb-4 text-on-surface">
+          What do you <br/><span className="text-secondary text-primary">want to learn?</span>
+        </h2>
+        <div className="relative max-w-xl group">
+          <input 
+            type="text" 
+            placeholder="Search for a guide..."
+            className="w-full h-16 bg-surface-container rounded-2xl px-14 text-lg border-none focus:ring-2 focus:ring-primary transition-all shadow-sm"
+          />
+          <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-secondary-container opacity-40">search</span>
         </div>
-      </header>
-
-      {/* Tutorial Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-20">
-        {/* Main Featured Tutorial */}
-        <article className="md:col-span-8 bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)] flex flex-col group border border-outline-variant/5">
-          <div className="h-80 overflow-hidden relative">
-            <img 
-              alt="WhatsApp Interface" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-              src={TUTORIALS[0].image} 
-            />
-            <div className="absolute top-6 left-6 bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-bold uppercase tracking-widest">
-              Most Popular
-            </div>
-          </div>
-          <div className="p-10 flex flex-col gap-6">
-            <div>
-              <h3 className="text-4xl font-bold text-on-surface mb-3">Mastering WhatsApp</h3>
-              <p className="text-xl text-on-surface-variant leading-relaxed">
-                Learn how to send photos, voice messages, and make video calls to your grandchildren. No technical jargon, just simple steps.
-              </p>
-            </div>
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-4 text-on-secondary-container">
-                <span className="material-symbols-outlined">schedule</span>
-                <span className="font-medium text-lg">15 Minutes</span>
-              </div>
-              <button 
-                onClick={() => handleStartTutorial("whatsapp")}
-                className="bg-primary text-on-primary px-10 py-5 rounded-lg text-lg font-bold transition-all hover:opacity-90 shadow-lg active:scale-95"
-              >
-                Start Tutorial
-              </button>
-            </div>
-          </div>
-        </article>
-
-        {/* Secondary Card */}
-        <article className="md:col-span-4 bg-surface-container-low rounded-xl overflow-hidden flex flex-col border border-outline-variant/5">
-          <div className="h-48 overflow-hidden">
-            <img 
-              alt="FaceTime Tutorial" 
-              className="w-full h-full object-cover" 
-              src={TUTORIALS[1].image} 
-            />
-          </div>
-          <div className="p-8 flex flex-col gap-4 flex-1">
-            <h3 className="text-2xl font-bold text-on-surface">FaceTime Basics</h3>
-            <p className="text-on-surface-variant text-lg leading-snug">
-              Seeing faces makes all the difference. Learn to video call in three taps.
-            </p>
-            <div className="mt-auto pt-6">
-              <button 
-                onClick={() => handleStartTutorial("facetime")}
-                className="w-full bg-secondary-container text-on-secondary-fixed font-bold py-4 rounded-lg hover:bg-secondary-fixed transition-colors text-lg active:scale-95"
-              >
-                Start Tutorial
-              </button>
-            </div>
-          </div>
-        </article>
-
-        {/* Bottom Bento Row */}
-        {TUTORIALS.slice(2).map((tut, idx) => (
-          <article key={idx} className="md:col-span-4 bg-surface-container-lowest rounded-xl p-8 flex flex-col gap-6 shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)] border border-outline-variant/5">
-            <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-primary scale-125">{tut.icon}</span>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-on-surface mb-2">{tut.title}</h3>
-              <p className="text-on-surface-variant text-lg">{tut.desc}</p>
-            </div>
-            <button 
-              onClick={() => handleStartTutorial("other")}
-              className="mt-auto text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform text-lg active:scale-95"
-            >
-              Start Tutorial <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
-          </article>
-        ))}
       </section>
 
-      {/* Help Hero section */}
-      <div className="max-w-6xl mx-auto mt-20 p-12 bg-surface-container-high rounded-xl relative overflow-hidden shadow-sm">
-        <div className="absolute right-0 top-0 w-1/3 h-full opacity-10">
-          <span className="material-symbols-outlined text-[20rem]">quiz</span>
-        </div>
-        <div className="relative z-10">
-          <h3 className="text-3xl font-bold mb-4">Can't find what you're looking for?</h3>
-          <p className="text-xl text-on-surface-variant mb-8 max-w-xl leading-relaxed">
-            Our AI Coach is available 24/7 to answer your specific questions. Just ask like you would a friend.
-          </p>
-          <Link href="/voice-coach">
-            <button className="bg-primary text-on-primary px-8 py-4 rounded-lg font-bold text-lg inline-flex items-center gap-3 hover:opacity-90">
-              <span className="material-symbols-outlined">psychology</span>
-              Ask the AI Coach
-            </button>
-          </Link>
+      {/* Primary Tutorial Card (Featured) */}
+      <div className="bg-surface-container-lowest rounded-[2.5rem] p-8 shadow-md border-none relative overflow-hidden group">
+        <div className="px-5 py-1.5 bg-secondary-container text-primary text-xs font-black rounded-full uppercase inline-block mb-6 tracking-widest">Most Popular</div>
+        <h3 className="text-[2.5rem] leading-tight font-extrabold text-on-surface mb-4">Using WhatsApp</h3>
+        <p className="text-xl text-on-secondary-container leading-relaxed mb-8 max-w-xl">
+          Learn how to send messages, share photos, and stay connected with your family and friends instantly.
+        </p>
+        <button 
+          onClick={() => setActiveTutorial("whatsapp")}
+          className="h-16 px-10 bg-primary text-on-primary rounded-2xl font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition-all mb-8"
+        >
+          Start Tutorial
+        </button>
+        <div className="rounded-3xl overflow-hidden shadow-2xl h-64">
+          <img src="https://images.unsplash.com/photo-1541870230286-8449607a0ba3?auto=format&fit=crop&q=80&w=800" alt="WhatsApp Guide" className="w-full h-full object-cover" />
         </div>
       </div>
 
-      {/* Sticky Mentor Guide */}
-      {showGuide && (
-        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10">
-          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-2xl border border-outline-variant/15 flex items-center gap-6 max-w-md relative overflow-hidden">
-            <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="material-symbols-outlined text-on-primary text-3xl">support_agent</span>
-            </div>
-            <div>
-              <p className="font-bold text-on-surface">Feeling stuck?</p>
-              <p className="text-on-surface-variant">Tap here and I'll walk you through it step-by-step.</p>
-            </div>
-            <button 
-              onClick={() => setShowGuide(false)}
-              className="absolute top-2 right-2 text-on-surface-variant opacity-40 hover:opacity-100"
-            >
-              <span className="material-symbols-outlined text-sm">close</span>
-            </button>
+      {/* Secondary Tutorial Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {[
+          { 
+            id: "facetime",
+            title: "How to FaceTime", 
+            icon: "videocam", 
+            desc: "See your loved ones' faces clearly while you talk, no matter the distance.",
+            steps: [
+              { title: "Open FaceTime", content: "Tap the green app icon with the video camera symbol.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
+              { title: "Find your Family", content: "Tap the '+' symbol or 'New FaceTime' at the top right.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
+              { title: "Start the Call", content: "Type the name of your loved one and tap the 'Video' button.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" }
+            ]
+          },
+          { 
+            id: "safety",
+            title: "Online Safety", 
+            icon: "verified_user", 
+            desc: "Learn how to recognize scams and keep your personal information private.",
+            steps: [
+              { title: "Unknown Links", content: "If you get a message from a bank asking for a password, it is a scam. Banks never ask for passwords in messages.", videoUrl: "https://www.youtube.com/embed/9Bv_3Y8p0u0" },
+              { title: "Verification", content: "Always call the company back using a number you found on their official website, not from the message.", videoUrl: "https://www.youtube.com/embed/9Bv_3Y8p0u0" }
+            ]
+          }
+        ].map((item, i) => (
+          <div key={i} className="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm flex flex-col justify-between min-h-[280px]">
+             <div className="flex flex-col gap-6">
+               <div className="w-16 h-16 bg-surface-container-high rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-4xl">{item.icon}</span>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold text-on-surface mb-2 tracking-tight">{item.title}</h3>
+                 <p className="text-lg text-on-secondary-container leading-relaxed opacity-80">{item.desc}</p>
+               </div>
+             </div>
+             <button 
+              onClick={() => setActiveTutorial(item.id)}
+              className="flex items-center gap-2 text-primary font-bold mt-8"
+             >
+               Start Tutorial <span className="material-symbols-outlined">arrow_forward</span>
+             </button>
           </div>
-        </div>
-      )}
-      {!showGuide && (
-        <button 
-          onClick={() => setShowGuide(true)}
-          className="fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
-        >
-          <span className="material-symbols-outlined text-3xl">support_agent</span>
-        </button>
+        ))}
+      </div>
+
+       {activeTutorial === "whatsapp" && (
+        <TutorialOverlay 
+          isOpen={true} 
+          onClose={() => setActiveTutorial(null)} 
+          steps={[
+            { title: "Opening the App", content: "Tap the green circular icon with a white telephone symbol on your home screen.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
+            { title: "Finding a Contact", content: "Tap the small message bubble at the bottom right to see your list of friends.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
+            { title: "Sending a Greeting", content: "Tap on a name, then tap the white box at the bottom to start typing 'Hello'.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" }
+          ]}
+        />
       )}
 
-      <TutorialOverlay 
-        isOpen={activeTutorial !== null}
-        steps={activeTutorial || []}
-        onClose={() => setActiveTutorial(null)}
-      />
+      {(activeTutorial === "facetime" || activeTutorial === "safety") && (
+        <TutorialOverlay 
+          isOpen={true} 
+          onClose={() => setActiveTutorial(null)} 
+          steps={
+            activeTutorial === "facetime" 
+            ? [
+                { title: "Open FaceTime", content: "Tap the green app icon with the video camera symbol.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
+                { title: "New Call", content: "Tap the 'New FaceTime' button to begin.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" }
+              ]
+            : [
+                { title: "Beware of Links", content: "Never tap links in messages from numbers you don't recognize.", videoUrl: "https://www.youtube.com/embed/9Bv_3Y8p0u0" }
+              ]
+          }
+        />
+      )}
     </div>
   )
 }

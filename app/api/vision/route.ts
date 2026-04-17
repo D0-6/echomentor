@@ -3,15 +3,21 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { imageUrl, prompt } = await req.json();
+    const { image, imageUrl, prompt } = await req.json();
+    const finalImageUrl = image || imageUrl;
 
-    if (!imageUrl || !prompt) {
+    if (!finalImageUrl || !prompt) {
       return NextResponse.json({ error: "Missing image or prompt" }, { status: 400 });
     }
 
-    const result = await getNimVisionResponse(imageUrl, prompt);
+    // Ensure it's a valid data URL for NIM
+    const formattedUrl = finalImageUrl.startsWith("data:") 
+      ? finalImageUrl 
+      : `data:image/jpeg;base64,${finalImageUrl}`;
 
-    return NextResponse.json({ result });
+    const analysis = await getNimVisionResponse(formattedUrl, prompt);
+
+    return NextResponse.json({ analysis });
   } catch (error) {
     console.error("API Vision Error:", error);
     return NextResponse.json({ error: "Failed to analyze image with NVIDIA NIM" }, { status: 500 });

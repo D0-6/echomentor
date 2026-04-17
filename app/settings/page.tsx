@@ -3,225 +3,289 @@
 import * as React from "react"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { cn } from "@/lib/utils"
+import { CHARACTERS } from "@/lib/characters"
+import { speak } from "@/lib/speech"
+import { VoiceAuditor } from "@/components/VoiceAuditor"
 
 export default function SettingsPage() {
   const { 
     highContrast, setHighContrast, 
     textScale, setTextScale, 
-    reducedMotion, setReducedMotion 
+    reducedMotion, setReducedMotion,
+    brightness, setBrightness,
+    voiceCharacterId, setVoiceCharacterId,
+    voiceSpeed, setVoiceSpeed
   } = useAccessibility()
-  
-  const [showGuide, setShowGuide] = React.useState(true)
+
+  const mentors = CHARACTERS.filter(c => c.role === "mentor")
+  const kids = CHARACTERS.filter(c => c.role === "kid")
 
   return (
-    <div className="flex-1 flex flex-col p-12 max-w-7xl animate-in fade-in duration-700">
-      <header className="mb-12">
-        <h2 className="text-5xl font-extrabold text-on-surface tracking-tight mb-4">Accessibility Settings</h2>
-        <p className="text-on-surface-variant text-xl max-w-2xl leading-relaxed">
-          Customize your EchoMentor experience to make it more comfortable, readable, and easier to use.
+    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+      {/* Editorial Header */}
+      <section className="text-left py-6">
+        <h2 className="editorial-display-lg mb-4 text-on-surface">
+          Tailor your <br/><span className="text-secondary text-primary">experience.</span>
+        </h2>
+        <p className="text-xl text-on-secondary-container max-w-xl leading-relaxed">
+          Adjust the interface to best suit your visual and auditory needs. These settings apply globally across EchoMentor.
         </p>
-      </header>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
-        <section className="space-y-8">
-          {/* Visual Comfort */}
-          <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)]">
-            <div className="flex items-center gap-4 mb-6 text-on-surface">
-              <span className="material-symbols-outlined text-3xl">text_fields</span>
-              <h3 className="text-2xl font-bold">Visual Comfort</h3>
+      {/* Settings Cards Stack */}
+      <div className="space-y-8">
+        
+        {/* Text Size Setting */}
+        <div className="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border-none flex flex-col gap-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-6">
+               <div className="w-16 h-16 bg-surface-container rounded-2xl flex items-center justify-center text-on-surface">
+                 <span className="material-symbols-outlined text-4xl">text_fields</span>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold text-on-surface mb-1">Extra Large Text</h3>
+                 <p className="text-lg text-on-secondary-container opacity-80 leading-snug">Increases all labels and paragraph text for better readability.</p>
+               </div>
             </div>
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <label className="text-lg font-semibold text-on-surface">Text Size</label>
-                  <span className="text-on-secondary-container font-medium">Extra Large</span>
-                </div>
-                <input 
-                  className="w-full h-3 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" 
-                  max="5" min="1" type="range" defaultValue={4}
-                />
-                <p className="text-on-secondary-container">Adjust how large text appears across the entire app.</p>
-              </div>
-
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">High Contrast</h4>
-                  <p className="text-on-secondary-container">Increases color contrast for better readability.</p>
-                </div>
-                <button 
-                  onClick={() => setHighContrast(!highContrast)}
-                  className={cn(
-                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                    highContrast ? "bg-primary" : "bg-surface-container-highest"
-                  )}
-                >
-                  <span className={cn(
-                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
-                    highContrast ? "translate-x-7" : "translate-x-1"
-                  )}></span>
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">Reduce Motion</h4>
-                  <p className="text-on-secondary-container">Minimizes animations and sliding effects.</p>
-                </div>
-                <button 
-                  onClick={() => setReducedMotion(!reducedMotion)}
-                  className={cn(
-                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                    reducedMotion ? "bg-primary" : "bg-surface-container-highest"
-                  )}
-                >
-                  <span className={cn(
-                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform",
-                    reducedMotion ? "translate-x-7" : "translate-x-1"
-                  )}></span>
-                </button>
-              </div>
-            </div>
+            {textScale === "extra-large" && (
+              <span className="px-4 py-1 bg-secondary-container text-primary text-[10px] font-black rounded-full uppercase tracking-widest">Active</span>
+            )}
           </div>
-
-          {/* Audio & Voice */}
-          <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)]">
-            <div className="flex items-center gap-4 mb-6 text-on-surface">
-              <span className="material-symbols-outlined text-3xl">record_voice_over</span>
-              <h3 className="text-2xl font-bold">Audio & Voice</h3>
-            </div>
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <label className="text-lg font-semibold text-on-surface">Coach Speaking Speed</label>
-                  <span className="text-on-secondary-container font-medium">Steady</span>
-                </div>
-                <input 
-                  className="w-full h-3 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" 
-                  max="3" min="1" type="range" defaultValue={1}
-                />
-                <p className="text-on-secondary-container">Control how fast the AI Coach speaks to you.</p>
+          <div className="flex items-center justify-between bg-surface-container rounded-2xl p-4">
+            <span className="text-xl font-bold ml-2">{textScale === "extra-large" ? "On" : "Off"}</span>
+            <button 
+              onClick={() => setTextScale(textScale === "normal" ? "extra-large" : "normal")}
+              className={cn(
+                "w-16 h-10 rounded-full transition-all duration-300 relative px-1 flex items-center shadow-inner",
+                textScale === "extra-large" ? "bg-primary" : "bg-[#c6c6cd]"
+              )}
+            >
+              <div className={cn(
+                "w-8 h-8 bg-white rounded-full shadow-md transition-all duration-300 flex items-center justify-center",
+                textScale === "extra-large" ? "translate-x-6" : "translate-x-0"
+              )}>
+                {textScale === "extra-large" && <span className="material-symbols-outlined text-[16px] font-black text-primary toggle-check">check</span>}
               </div>
-
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">Audio Transcriptions</h4>
-                  <p className="text-on-secondary-container">Show live text for all audio messages.</p>
-                </div>
-                <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-primary transition-colors">
-                  <span className="translate-x-7 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"></span>
-                </button>
-              </div>
-            </div>
+            </button>
           </div>
-        </section>
+        </div>
 
-        {/* Right Column */}
-        <section className="space-y-8">
-          {/* Interaction */}
-          <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.08)]">
-            <div className="flex items-center gap-4 mb-6 text-on-surface">
-              <span className="material-symbols-outlined text-3xl">touch_app</span>
-              <h3 className="text-2xl font-bold">Interaction</h3>
+        {/* High Contrast Color Setting */}
+        <div className="bg-surface-container-low rounded-[2rem] p-8 shadow-sm border-none flex flex-col gap-6">
+           <div className="flex items-center gap-6">
+               <div className="w-16 h-16 bg-surface-container-high rounded-2xl flex items-center justify-center text-on-surface">
+                 <span className="material-symbols-outlined text-4xl">contrast</span>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold text-on-surface mb-1">High Contrast Colors</h3>
+                 <p className="text-lg text-on-secondary-container opacity-80 leading-snug">Increases the distinction between text and background.</p>
+               </div>
             </div>
-            <div className="space-y-10">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">Text Size</h4>
-                  <p className="text-on-secondary-container">Makes all words on the screen larger and easier to see.</p>
-                </div>
-                <div className="flex gap-2">
-                  {(["normal", "large", "extra-large"] as const).map((scale) => (
-                    <button
-                      key={scale}
-                      onClick={() => setTextScale(scale)}
+            <div className="flex items-center justify-between bg-surface-container-high rounded-2xl p-4">
+            <span className="text-xl font-bold ml-2">{highContrast ? "On" : "Off"}</span>
+            <button 
+              onClick={() => setHighContrast(!highContrast)}
+              className={cn(
+                "w-16 h-10 rounded-full transition-all duration-300 relative px-1 flex items-center shadow-inner",
+                highContrast ? "bg-primary" : "bg-[#c6c6cd]"
+              )}
+            >
+              <div className={cn(
+                "w-8 h-8 bg-white rounded-full shadow-md transition-all duration-300 flex items-center justify-center",
+                highContrast ? "translate-x-6" : "translate-x-0"
+              )}>
+                 {highContrast && <span className="material-symbols-outlined text-[16px] font-black text-primary toggle-check">check</span>}
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Reduced Motion Setting */}
+        <div className="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border-none flex flex-col gap-6">
+          <div className="flex items-center gap-6">
+               <div className="w-16 h-16 bg-secondary-container rounded-2xl flex items-center justify-center text-primary">
+                 <span className="material-symbols-outlined text-4xl">motion_photos_off</span>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold text-on-surface mb-1">Reduce Motion</h3>
+                 <p className="text-lg text-on-secondary-container opacity-80 leading-snug">Turn off flashing or moving animations for a calmer experience.</p>
+               </div>
+            </div>
+          <div className="flex items-center justify-between bg-surface-container rounded-2xl p-4">
+            <span className="text-xl font-bold ml-2">{reducedMotion ? "On" : "Off"}</span>
+            <button 
+              onClick={() => setReducedMotion(!reducedMotion)}
+              className={cn(
+                "w-20 h-10 rounded-full transition-all duration-300 relative px-1 flex items-center shadow-inner",
+                reducedMotion ? "bg-primary" : "bg-[#c6c6cd]"
+              )}
+            >
+              <div className={cn(
+                "w-8 h-8 bg-white rounded-full shadow-md transition-all duration-300 flex items-center justify-center",
+                reducedMotion ? "translate-x-10" : "translate-x-0"
+              )}>
+                {reducedMotion && <span className="material-symbols-outlined text-[16px] font-black text-primary toggle-check">check</span>}
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Screen Brightness Functional Slider */}
+        <div className="bg-surface-container-low rounded-[2rem] p-8 shadow-sm border-none space-y-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold flex items-center gap-4">
+                <span className="material-symbols-outlined text-3xl">light_mode</span>
+                Screen Brightness
+              </h3>
+              <span className="text-2xl font-bold">{brightness}%</span>
+            </div>
+            <div className="relative w-full px-2">
+               <input 
+                 type="range" 
+                 min="10" 
+                 max="100" 
+                 step="5"
+                 value={brightness}
+                 onChange={(e) => setBrightness(parseInt(e.target.value))}
+                 className="w-full h-4 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary"
+               />
+               <div className="flex justify-between mt-2 text-xs font-bold opacity-40 uppercase tracking-widest">
+                 <span>Dim</span>
+                 <span>Normal</span>
+               </div>
+            </div>
+        </div>
+
+        {/* Voice & Audio Preferences */}
+        <div className="bg-surface-container-low rounded-[2rem] p-8 shadow-sm border-none space-y-8">
+            <div className="flex items-center gap-6 mb-4">
+              <div className="w-16 h-16 bg-secondary-container rounded-2xl flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined text-4xl">record_voice_over</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-on-surface mb-1">Voice Assistant</h3>
+                <p className="text-lg text-on-secondary-container opacity-80 leading-snug">Personalize the voice of your EchoMentor guide.</p>
+              </div>
+            </div>
+
+            {/* Character Gallery Selection */}
+            <div className="space-y-12">
+              {/* Mentors Section */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-black uppercase tracking-widest opacity-40 ml-2">Wisdom Guides (Seniors)</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {mentors.map(character => (
+                    <div 
+                      key={character.id}
+                      onClick={() => setVoiceCharacterId(character.id)}
                       className={cn(
-                        "px-4 py-2 rounded-lg border-2 font-bold transition-all",
-                        textScale === scale 
-                          ? "bg-primary text-on-primary border-primary" 
-                          : "border-outline-variant text-on-surface hover:bg-surface-container"
+                        "relative p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center gap-3 text-center",
+                        voiceCharacterId === character.id 
+                          ? "bg-primary/5 border-primary shadow-md ring-4 ring-primary/10" 
+                          : "bg-surface-container border-transparent hover:border-outline-variant/30"
                       )}
                     >
-                      {scale === "normal" ? "Normal" : scale === "large" ? "Large" : "Huge"}
-                    </button>
+                      <div className={cn(
+                        "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
+                        voiceCharacterId === character.id ? "bg-primary text-on-primary" : "bg-surface-container-highest text-on-surface"
+                      )}>
+                        <span className="material-symbols-outlined text-4xl">
+                          {character.name === "Arthur" || character.name === "Walter" || character.name === "George" ? "elderly" : "elderly_woman"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">{character.name}</p>
+                        <p className="text-[10px] opacity-60 leading-tight mt-1 px-1">Best Choice</p>
+                      </div>
+                      
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          speak(`Hello! I am ${character.name}, your guide.`, character.id, voiceSpeed);
+                        }}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white dark:bg-surface-container-high shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                      >
+                        <span className="material-symbols-outlined text-sm text-primary">volume_up</span>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <h4 className="text-lg font-semibold mb-1">Click Confirmation</h4>
-                  <p className="text-on-secondary-container">Asks for confirmation on major actions.</p>
+              {/* Kids Section */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-black uppercase tracking-widest opacity-40 ml-2">Young Helpers (Grandchildren)</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {kids.map(character => (
+                    <div 
+                      key={character.id}
+                      onClick={() => setVoiceCharacterId(character.id)}
+                      className={cn(
+                        "relative p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col items-center gap-3 text-center",
+                        voiceCharacterId === character.id 
+                          ? "bg-secondary/5 border-secondary shadow-md ring-4 ring-secondary/10" 
+                          : "bg-surface-container border-transparent hover:border-outline-variant/30"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
+                        voiceCharacterId === character.id ? "bg-secondary text-on-secondary" : "bg-surface-container-highest text-on-surface"
+                      )}>
+                        <span className="material-symbols-outlined text-4xl">
+                          {character.name === "Leo" || character.name === "Sam" || character.name === "Jack" ? "child_care" : "child_care"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">{character.name}</p>
+                        <p className="text-[10px] opacity-60 leading-tight mt-1 px-1">Grandchild Helper</p>
+                      </div>
+
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          speak(`Hi! I'm ${character.name}. I'm here to help!`, character.id, voiceSpeed);
+                        }}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white dark:bg-surface-container-high shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                      >
+                        <span className="material-symbols-outlined text-sm text-secondary">volume_up</span>
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <button className="relative inline-flex h-8 w-14 items-center rounded-full bg-surface-container-highest transition-colors">
-                  <span className="translate-x-1 inline-block h-6 w-6 transform rounded-full bg-white transition-transform"></span>
-                </button>
               </div>
             </div>
-          </div>
 
-          {/* Help Box */}
-          <div className="bg-surface-container-high/50 p-8 rounded-xl relative overflow-hidden shadow-sm">
-            <div className="relative z-10">
-              <h3 className="text-3xl font-bold mb-4">Need Help?</h3>
-              <p className="text-lg text-on-surface-variant mb-8 leading-relaxed">
-                Not sure which settings are right for you? Our AI Coach can guide you through a personalized setup.
-              </p>
-              <button className="bg-primary text-on-primary h-[56px] px-8 rounded-lg font-bold flex items-center gap-3 hover:scale-95 transition-all">
-                <span className="material-symbols-outlined">chat</span>
-                Ask Coach
-              </button>
-            </div>
-            <div className="absolute -right-8 -bottom-8 opacity-10">
-              <span className="material-symbols-outlined text-[200px]">support_agent</span>
-            </div>
-          </div>
-
-          {/* Tip Card */}
-          <div className="bg-secondary-container p-8 rounded-xl shadow-sm">
-            <div className="flex gap-6 items-start">
-              <div className="bg-surface-container-lowest p-4 rounded-full">
-                <span className="material-symbols-outlined text-primary text-3xl">lightbulb</span>
+            {/* Voice Speed Slider */}
+            <div>
+              <div className="flex items-center justify-between mb-4 mt-2">
+                <span className="text-xl font-bold ml-2">Speaking Speed</span>
+                <span className="text-xl font-bold">
+                  {voiceSpeed < 0.8 ? "Slow" : voiceSpeed > 1.1 ? "Fast" : "Normal"}
+                </span>
               </div>
-              <div>
-                <h4 className="text-xl font-bold mb-2">Pro Tip</h4>
-                <p className="text-on-secondary-container leading-relaxed">
-                  You can always say "Hey Echo, make the text bigger" at any time to adjust these settings using your voice.
-                </p>
+              <div className="relative w-full px-2">
+                 <input 
+                   type="range" 
+                   min="0.5" 
+                   max="1.5" 
+                   step="0.05"
+                   value={voiceSpeed}
+                   onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
+                   className="w-full h-4 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary"
+                 />
+                 <div className="flex justify-between mt-2 text-xs font-bold opacity-40 uppercase tracking-widest">
+                   <span>Slower</span>
+                   <span>Faster</span>
+                 </div>
               </div>
             </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Sticky Mentor Guide */}
-      {showGuide && (
-        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-right-10">
-          <div className="bg-surface-bright/90 backdrop-blur-xl p-6 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.2)] border border-outline-variant/15 flex items-center gap-4 max-w-md relative overflow-hidden">
-            <div className="bg-primary-container p-3 rounded-full">
-              <span className="material-symbols-outlined text-on-primary" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-on-surface font-semibold">Mentor Guide Active</p>
-              <p className="text-on-surface-variant text-sm">Tap here if you need help navigating this page.</p>
-            </div>
-            <button 
-              onClick={() => setShowGuide(false)}
-              className="absolute top-2 right-2 text-outline hover:text-on-surface transition-colors"
-            >
-              <span className="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
         </div>
-      )}
-      {!showGuide && (
-        <button 
-          onClick={() => setShowGuide(true)}
-          className="fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50"
-        >
-          <span className="material-symbols-outlined text-3xl">smart_toy</span>
-        </button>
-      )}
+
+        {/* Voice Auditor — shows all device voices */}
+        <VoiceAuditor />
+
+      </div>
     </div>
   )
 }
+

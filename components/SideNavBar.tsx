@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 
 const NAV_ITEMS = [
+  { name: "Assistant", href: "/chat", icon: "auto_awesome" },
   { name: "AI Coach", href: "/voice-coach", icon: "psychology" },
   { name: "Scam Detector", href: "/scam-detector", icon: "gpp_bad" },
   { name: "Tutorials", href: "/tutorials", icon: "school" },
@@ -18,7 +19,7 @@ export function SideNavBar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 h-screen flex flex-col p-6 z-40 bg-surface dark:bg-[#0b1c30] w-80 border-none shadow-sm">
+    <aside className="fixed left-0 top-0 h-screen flex-col p-6 z-40 bg-surface dark:bg-[#0b1c30] w-80 border-none shadow-sm lg:flex hidden">
       <div className="mb-12 px-6">
         <Link href="/">
           <h1 className="text-xl font-bold text-[#0b1c30] dark:text-[#ffffff] cursor-pointer">EchoMentor</h1>
