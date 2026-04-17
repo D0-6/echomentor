@@ -5,7 +5,7 @@ import { VoiceInput } from "@/components/VoiceInput"
 import { cn } from "@/lib/utils"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
-import { speak } from "@/lib/speech"
+import { speak, warmupSpeech } from "@/lib/speech"
 import { SAFETY_AUDIT_PROMPT } from "@/lib/prompts"
 
 interface Message {
@@ -63,8 +63,11 @@ export default function MasterAssistantPage() {
     }
   }, [messages, interimText, isTyping])
 
-  const handleSendMessage = async (text: string, type: "text" | "image" | "pdf" = "text", metadata?: any) => {
+  const handleSendMessage = React.useCallback(async (text: string, type: "text" | "image" | "pdf" = "text", metadata?: any) => {
     if (!text && !metadata) return
+    
+    // DEPLOYMENT FIX: Unlock browser speech synthesis on this user gesture
+    warmupSpeech()
     
     const userMsg: Message = { id: Date.now().toString(), role: "user", type, content: text, metadata }
     setMessages(prev => [...prev, userMsg])
@@ -124,9 +127,9 @@ export default function MasterAssistantPage() {
     } finally {
       setIsTyping(false)
     }
-  }
+  }, [messages, voiceCharacterId, voiceSpeed])
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "pdf") => {
+  const handleFileUpload = React.useCallback((e: React.ChangeEvent<HTMLInputElement>, type: "image" | "pdf") => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
@@ -139,19 +142,16 @@ export default function MasterAssistantPage() {
       }
     }
     reader.readAsDataURL(file)
-  }
+  }, [handleSendMessage])
 
   return (
-    <div className={cn(
-      "flex flex-col h-dynamic-screen lg:h-[calc(100dvh-40px)] max-w-4xl mx-auto overflow-hidden transition-all duration-300",
-      windowSize.isMobile ? "px-2" : "px-0"
-    )}>
+    <div className="flex flex-col h-dynamic-screen fluid-container overflow-hidden transition-all duration-500">
       
-      {/* Editorial Header */}
-      <div className="py-4 px-1 border-b border-outline-variant/10 flex items-center justify-between">
+      {/* Editorial Header - Mathematically Scaling */}
+      <div className="py-[clamp(0.5rem,2vw,1.5rem)] px-1 border-b border-outline-variant/10 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black text-on-surface">Your <span className="text-primary">Assistant</span></h2>
-          <p className="text-sm font-bold opacity-60 uppercase tracking-widest">Voice • Photo • Document</p>
+          <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-black text-on-surface leading-tight">Your <span className="text-primary">Assistant</span></h2>
+          <p className="text-[clamp(0.7rem,1.5vw,0.85rem)] font-bold opacity-60 uppercase tracking-widest mt-1">Voice • Photo • Document</p>
         </div>
         <button 
           onClick={() => {
@@ -160,43 +160,43 @@ export default function MasterAssistantPage() {
               localStorage.removeItem("echomentor_chat_history")
             }
           }}
-          className="w-10 h-10 flex items-center justify-center text-on-surface-variant/40 hover:text-error transition-colors"
+          className="w-[clamp(2.5rem,5vw,3.5rem)] h-[clamp(2.5rem,5vw,3.5rem)] flex items-center justify-center text-on-surface-variant/40 hover:text-error transition-colors rounded-full hover:bg-error/5"
           title="Clear History"
         >
-          <span className="material-symbols-outlined">delete_sweep</span>
+          <span className="material-symbols-outlined icon-md">delete_sweep</span>
         </button>
       </div>
 
-      {/* Message Feed */}
+      {/* Message Feed - Fluid Spacing */}
       <div 
         ref={scrollRef}
-        className="flex-grow overflow-y-auto p-4 space-y-6 scroll-smooth"
+        className="flex-grow overflow-y-auto adaptive-p space-y-[clamp(1rem,3vw,2.5rem)] scroll-smooth scrollbar-thin scrollbar-thumb-outline-variant/20 shadow-inner"
       >
         {messages.map((msg) => (
           <div 
             key={msg.id}
             className={cn(
-              "flex flex-col max-w-[85%]",
+              "flex flex-col w-full max-w-[min(90%,800px)]",
               msg.role === "user" ? "ml-auto items-end" : "items-start"
             )}
           >
             <div 
               className={cn(
-                "rounded-[2rem] p-6 text-xl leading-relaxed shadow-sm",
+                "rounded-[clamp(1.5rem,4vw,2.5rem)] p-[clamp(1rem,2.5vw,1.75rem)] text-[clamp(1.1rem,2.2vw,1.35rem)] leading-relaxed shadow-sm",
                 msg.role === "user" 
                   ? "bg-primary text-on-primary rounded-tr-none" 
                   : "bg-surface-container-low text-on-surface rounded-tl-none border border-outline-variant/10"
               )}
             >
               {msg.type === "pdf" && (
-                <div className="flex items-center gap-3 mb-2 bg-on-primary/10 p-3 rounded-xl">
-                  <span className="material-symbols-outlined">description</span>
-                  <span className="text-sm font-bold uppercase tracking-tighter">Document: {msg.metadata?.name}</span>
+                <div className="flex items-center gap-3 mb-3 bg-on-primary/10 p-3 rounded-xl border border-on-primary/5">
+                  <span className="material-symbols-outlined icon-sm">description</span>
+                  <span className="text-[clamp(0.75rem,1.5vw,0.9rem)] font-bold uppercase tracking-tight">File: {msg.metadata?.name}</span>
                 </div>
               )}
               {msg.content}
             </div>
-            <span className="text-[10px] mt-2 font-black uppercase opacity-30 px-4">
+            <span className="text-[clamp(0.6rem,1.2vw,0.75rem)] mt-2 font-black uppercase opacity-30 px-[clamp(0.5rem,2vw,1.5rem)]">
               {msg.role === "user" ? "You" : "EchoMentor"}
             </span>
           </div>
@@ -204,28 +204,28 @@ export default function MasterAssistantPage() {
 
         {/* Interim Transcription Bubble */}
         {interimText && (
-          <div className="flex flex-col items-end ml-auto max-w-[80%] opacity-70 animate-pulse">
-            <div className="bg-secondary-container text-primary rounded-[2rem] p-6 text-xl rounded-tr-none font-medium italic">
+          <div className="flex flex-col items-end ml-auto max-w-[85%] opacity-70 animate-pulse">
+            <div className="bg-secondary-container text-primary rounded-[clamp(1.5rem,4vw,2.5rem)] p-[clamp(1rem,2.5vw,1.75rem)] text-[clamp(1.1rem,2.2vw,1.35rem)] rounded-tr-none font-medium italic">
               {interimText}...
             </div>
           </div>
         )}
 
         {isTyping && !interimText && (
-          <div className="flex gap-1 p-4">
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
+          <div className="flex gap-2 p-4">
+            <div className="w-[clamp(6px,1vw,10px)] h-[clamp(6px,1vw,10px)] bg-primary rounded-full animate-bounce" />
+            <div className="w-[clamp(6px,1vw,10px)] h-[clamp(6px,1vw,10px)] bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
+            <div className="w-[clamp(6px,1vw,10px)] h-[clamp(6px,1vw,10px)] bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
           </div>
         )}
       </div>
 
-      {/* Unified Input Bar */}
-      <div className="p-4 bg-surface-container-lowest border-t border-outline-variant/10">
-        <div className="flex gap-3 items-end">
+      {/* Unified Input Bar - Proportionally Scaling */}
+      <div className="p-[clamp(0.75rem,2vw,1.5rem)] bg-surface-container-lowest border-t border-outline-variant/10 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+        <div className="flex adaptive-gap items-end">
           
-          {/* File Actions Menu (Quick Access) */}
-          <div className="flex flex-col gap-2">
+          {/* File Actions Menu */}
+          <div className="flex flex-col gap-[clamp(0.5rem,1vw,1rem)]">
             <button 
               onClick={() => {
                 const input = document.createElement('input')
@@ -234,10 +234,10 @@ export default function MasterAssistantPage() {
                 input.onchange = (e) => handleFileUpload(e as any, "image")
                 input.click()
               }}
-              className="w-14 h-14 bg-surface-container-high rounded-2xl flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all shadow-sm chat-icon-btn"
+              className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-surface-container-high rounded-[clamp(1rem,2vw,1.5rem)] flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all shadow-sm active:scale-90"
               aria-label="Upload Photo"
             >
-              <span className="material-symbols-outlined">add_a_photo</span>
+              <span className="material-symbols-outlined icon-md">add_a_photo</span>
             </button>
              <button 
               onClick={() => {
@@ -247,19 +247,19 @@ export default function MasterAssistantPage() {
                 input.onchange = (e) => handleFileUpload(e as any, "pdf")
                 input.click()
               }}
-              className="w-14 h-14 bg-surface-container-high rounded-2xl flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all shadow-sm chat-icon-btn"
+              className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-surface-container-high rounded-[clamp(1rem,2vw,1.5rem)] flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-all shadow-sm active:scale-90"
               aria-label="Upload PDF"
             >
-              <span className="material-symbols-outlined">description</span>
+              <span className="material-symbols-outlined icon-md">description</span>
             </button>
           </div>
 
           {/* Text/Voice Compound Input */}
-          <div className="flex-grow flex items-center bg-surface-container rounded-[2rem] p-2 ring-1 ring-outline-variant/10 focus-within:ring-primary transition-all shadow-inner">
+          <div className="flex-grow flex items-center bg-surface-container rounded-[clamp(1.5rem,4vw,3.5rem)] p-[clamp(0.5rem,1vw,0.75rem)] ring-1 ring-outline-variant/10 focus-within:ring-primary focus-within:ring-2 transition-all shadow-inner">
              <input 
                type="text" 
-               placeholder="Type a message..."
-               className="flex-grow bg-transparent border-none focus:ring-0 text-lg px-4"
+               placeholder="Write or speak..."
+               className="flex-grow bg-transparent border-none focus:ring-0 text-[clamp(1rem,2vw,1.25rem)] px-4 placeholder:opacity-50"
                value={inputText}
                onChange={(e) => setInputText(e.target.value)}
                onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputText)}
@@ -270,10 +270,10 @@ export default function MasterAssistantPage() {
                onListeningChange={setIsListening}
                customTrigger={
                  <div className={cn(
-                   "w-14 h-14 rounded-full flex items-center justify-center transition-all",
+                   "w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] rounded-full flex items-center justify-center transition-all shadow-md active:scale-95",
                    isListening ? "bg-error text-on-error animate-pulse" : "bg-primary text-on-primary"
                  )}>
-                   <span className="material-symbols-outlined text-3xl">
+                   <span className="material-symbols-outlined icon-md">
                      {isListening ? "mic_off" : "mic"}
                    </span>
                  </div>
@@ -284,9 +284,9 @@ export default function MasterAssistantPage() {
           <button 
             disabled={!inputText.trim()}
             onClick={() => handleSendMessage(inputText)}
-            className="w-14 h-14 bg-primary text-on-primary rounded-2xl flex items-center justify-center shadow-lg disabled:opacity-30 transition-all hover:scale-105 active:scale-95"
+            className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-primary text-on-primary rounded-[clamp(1rem,2vw,1.5rem)] flex items-center justify-center shadow-lg disabled:opacity-20 transition-all hover:scale-105 active:scale-95"
           >
-            <span className="material-symbols-outlined text-3xl">send</span>
+            <span className="material-symbols-outlined icon-md">send</span>
           </button>
         </div>
       </div>

@@ -71,7 +71,7 @@
   }
 }
 
-/* Material Symbols Integration */
+/* Material Symbols Integration with Fluid Scaling */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   display: inline-block;
@@ -81,7 +81,13 @@
   word-wrap: normal;
   white-space: nowrap;
   direction: ltr;
+  /* Fluid Icon Scaling: Scale icon size mathematically with viewport */
+  font-size: clamp(1.5rem, 5vw, 3.5rem);
 }
+
+.icon-sm { font-size: clamp(1.25rem, 3vw, 2rem) !important; }
+.icon-md { font-size: clamp(1.75rem, 6vw, 4rem) !important; }
+.icon-lg { font-size: clamp(2.5rem, 10vw, 6.5rem) !important; }
 
 .tonal-shift-no-lines {
   background: linear-gradient(180deg, rgba(248,249,255,1) 0%, rgba(239,244,255,1) 100%);
@@ -206,18 +212,37 @@
   letter-spacing: -0.04em;
 }
 
+@layer base {
+  /* Global Fluid Typography Math */
+  html {
+    /* Responsive base font size: 16px at 320px -> 20px at 1200px */
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+  }
+}
+
 @layer utilities {
   .adaptive-p {
-    @apply p-5 md:p-8 lg:p-10;
+    /* Padding scales mathematically from 16px to 64px */
+    padding: clamp(1rem, 5vw, 4rem);
   }
   .adaptive-gap {
-    @apply gap-4 md:gap-8 lg:gap-12;
+    /* Gaps scale mathematically from 12px to 48px */
+    gap: clamp(0.75rem, 4vw, 3rem);
+  }
+  .adaptive-rounded {
+    /* Border radius scales mathematically */
+    border-radius: clamp(1.5rem, 4vw, 3rem);
   }
   .h-dynamic-screen {
     height: 100dvh;
   }
   .min-h-dynamic-screen {
     min-height: 100dvh;
+  }
+  /* Fluid container width */
+  .fluid-container {
+    width: min(92%, 1440px);
+    margin-inline: auto;
   }
 }
 

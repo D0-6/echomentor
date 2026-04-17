@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
+    // DEPLOYMENT FIX: Fail fast with a clear message if the API key is missing
+    if (!process.env.NVIDIA_NIM_API_KEY) {
+      console.error("FATAL: NVIDIA_NIM_API_KEY is not set in environment variables")
+      return NextResponse.json(
+        { error: "Server configuration error: AI service key is missing. Please set NVIDIA_NIM_API_KEY." }, 
+        { status: 500 }
+      );
+    }
+
     const { messages } = await req.json();
 
     if (!messages) {

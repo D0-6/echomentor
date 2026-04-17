@@ -7,7 +7,7 @@ export default function TutorialsPage() {
   const [activeTutorial, setActiveTutorial] = React.useState<string | null>(null)
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+    <div className="fluid-container adaptive-p space-y-[clamp(1rem,4vw,3rem)] pb-32">
        {/* Editorial Header */}
       <section className="text-left py-6">
         <h2 className="editorial-display-lg mb-4 text-on-surface">
@@ -17,70 +17,63 @@ export default function TutorialsPage() {
           <input 
             type="text" 
             placeholder="Search for a guide..."
-            className="w-full h-16 bg-surface-container rounded-2xl px-14 text-lg border-none focus:ring-2 focus:ring-primary transition-all shadow-sm"
+            className="w-full h-[clamp(3.5rem,7vw,4.5rem)] bg-surface-container rounded-[clamp(1rem,2vw,1.5rem)] px-[clamp(3rem,6vw,4rem)] text-[clamp(1rem,1.8vw,1.25rem)] border-none focus:ring-2 focus:ring-primary transition-all shadow-sm"
           />
-          <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-secondary-container opacity-40">search</span>
+          <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-secondary-container opacity-40 icon-sm">search</span>
         </div>
       </section>
 
-      {/* Primary Tutorial Card (Featured) */}
-      <div className="bg-surface-container-lowest rounded-[2.5rem] p-8 shadow-md border-none relative overflow-hidden group">
-        <div className="px-5 py-1.5 bg-secondary-container text-primary text-xs font-black rounded-full uppercase inline-block mb-6 tracking-widest">Most Popular</div>
-        <h3 className="text-[2.5rem] leading-tight font-extrabold text-on-surface mb-4">Using WhatsApp</h3>
-        <p className="text-xl text-on-secondary-container leading-relaxed mb-8 max-w-xl">
+      {/* Primary Tutorial Card (Featured) - Mathematically Fluid */}
+      <div className="bg-surface-container-lowest adaptive-rounded adaptive-p shadow-md border border-outline-variant/10 relative overflow-hidden group">
+        <div className="px-5 py-1.5 bg-secondary-container text-primary text-[clamp(0.6rem,1.2vw,0.75rem)] font-black rounded-full uppercase inline-block mb-6 tracking-widest">Most Popular</div>
+        <h3 className="text-[clamp(1.75rem,5vw,3rem)] leading-tight font-extrabold text-on-surface mb-4">Using WhatsApp</h3>
+        <p className="text-[clamp(1.1rem,2vw,1.35rem)] text-on-secondary-container leading-relaxed mb-8 max-w-xl">
           Learn how to send messages, share photos, and stay connected with your family and friends instantly.
         </p>
         <button 
           onClick={() => setActiveTutorial("whatsapp")}
-          className="h-16 px-10 bg-primary text-on-primary rounded-2xl font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition-all mb-8"
+          className="h-[clamp(3.5rem,7vw,4.5rem)] px-[clamp(1.5rem,4vw,3rem)] bg-primary text-on-primary rounded-[clamp(1rem,2vw,1.5rem)] font-bold text-[clamp(1.1rem,1.8vw,1.25rem)] shadow-lg hover:scale-105 active:scale-95 transition-all mb-8"
         >
           Start Tutorial
         </button>
-        <div className="rounded-3xl overflow-hidden shadow-2xl h-64">
+        <div className="adaptive-rounded overflow-hidden shadow-2xl h-[clamp(200px,30vw,320px)] border border-outline-variant/5">
           <img src="https://images.unsplash.com/photo-1541870230286-8449607a0ba3?auto=format&fit=crop&q=80&w=800" alt="WhatsApp Guide" className="w-full h-full object-cover" />
         </div>
       </div>
 
-      {/* Secondary Tutorial Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Secondary Tutorial Grid - Intrinsic Mathematical Layout */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(320px,100%),1fr))] adaptive-gap">
         {[
           { 
             id: "facetime",
             title: "How to FaceTime", 
             icon: "videocam", 
             desc: "See your loved ones' faces clearly while you talk, no matter the distance.",
-            steps: [
-              { title: "Open FaceTime", content: "Tap the green app icon with the video camera symbol.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
-              { title: "Find your Family", content: "Tap the '+' symbol or 'New FaceTime' at the top right.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" },
-              { title: "Start the Call", content: "Type the name of your loved one and tap the 'Video' button.", videoUrl: "https://www.youtube.com/embed/S_vLdCO9-q0" }
-            ]
+            steps: []
           },
           { 
             id: "safety",
             title: "Online Safety", 
             icon: "verified_user", 
             desc: "Learn how to recognize scams and keep your personal information private.",
-            steps: [
-              { title: "Unknown Links", content: "If you get a message from a bank asking for a password, it is a scam. Banks never ask for passwords in messages.", videoUrl: "https://www.youtube.com/embed/9Bv_3Y8p0u0" },
-              { title: "Verification", content: "Always call the company back using a number you found on their official website, not from the message.", videoUrl: "https://www.youtube.com/embed/9Bv_3Y8p0u0" }
-            ]
+            steps: []
           }
         ].map((item, i) => (
-          <div key={i} className="bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm flex flex-col justify-between min-h-[280px]">
-             <div className="flex flex-col gap-6">
-               <div className="w-16 h-16 bg-surface-container-high rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-4xl">{item.icon}</span>
+          <div key={i} className="bg-surface-container-lowest adaptive-rounded adaptive-p shadow-sm flex flex-col justify-between min-h-[clamp(240px,30vw,320px)] border border-outline-variant/10">
+             <div className="flex flex-col adaptive-gap">
+               <div className="w-[clamp(3.5rem,6vw,5rem)] h-[clamp(3.5rem,6vw,5rem)] bg-surface-container-high rounded-[20%] flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm">
+                  <span className="material-symbols-outlined icon-md">{item.icon}</span>
                </div>
                <div>
-                 <h3 className="text-2xl font-bold text-on-surface mb-2 tracking-tight">{item.title}</h3>
-                 <p className="text-lg text-on-secondary-container leading-relaxed opacity-80">{item.desc}</p>
+                 <h3 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-on-surface mb-2 tracking-tight">{item.title}</h3>
+                 <p className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container leading-relaxed opacity-80">{item.desc}</p>
                </div>
              </div>
              <button 
               onClick={() => setActiveTutorial(item.id)}
-              className="flex items-center gap-2 text-primary font-bold mt-8"
+              className="flex items-center gap-2 text-primary font-bold mt-8 text-[clamp(1rem,1.5vw,1.25rem)]"
              >
-               Start Tutorial <span className="material-symbols-outlined">arrow_forward</span>
+               Start Tutorial <span className="material-symbols-outlined icon-sm">arrow_forward</span>
              </button>
           </div>
         ))}

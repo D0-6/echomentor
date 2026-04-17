@@ -29,78 +29,106 @@ export function VoiceInput({
   const [error, setError] = React.useState<string | null>(null)
   const recognitionRef = React.useRef<any>(null)
 
+  // Use refs for callbacks to prevent effect re-runs
+  const onResultRef = React.useRef(onResult)
+  const onInterimResultRef = React.useRef(onInterimResult)
+  const onListeningChangeRef = React.useRef(onListeningChange)
+
+  React.useEffect(() => {
+    onResultRef.current = onResult
+    onInterimResultRef.current = onInterimResult
+    onListeningChangeRef.current = onListeningChange
+  }, [onResult, onInterimResult, onListeningChange])
+
   // Explicitly handle controlled state changes
   React.useEffect(() => {
-    if (controlledIsListening === true && !internalIsListening) {
+    if (controlledIsListening === true) {
       if (recognitionRef.current) {
-        try {
-          recognitionRef.current.start()
-        } catch (e) {
-          // Ignore if already started
-        }
+        try { recognitionRef.current.start() } catch (e) {}
       }
-    } else if (controlledIsListening === false && internalIsListening) {
-      recognitionRef.current?.stop()
+    } else if (controlledIsListening === false) {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop() } catch (e) {}
+      }
     }
   }, [controlledIsListening])
 
   React.useEffect(() => {
+    // DEPLOYMENT FIX: Web Speech API requires a SECURE context (HTTPS)
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      setError("Voice requires a secure (HTTPS) connection. Please use HTTPS to enable the microphone.")
+      return
+    }
+
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
     
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition()
-      recognition.continuous = false // Auto-stop on pause for clear conversational turns
-      recognition.interimResults = true
-      recognition.lang = 'en-US'
-
-      recognition.onstart = () => {
-        setIsListening(true)
-        onListeningChange?.(true)
-        setError(null)
-      }
-
-      recognition.onresult = (event: any) => {
-        let interimTranscript = ""
-        let finalTranscript = ""
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript
-          } else {
-            interimTranscript += event.results[i][0].transcript
-          }
-        }
-
-        if (finalTranscript) {
-          onResult(finalTranscript)
-        }
-        
-        if (interimTranscript && onInterimResult) {
-          onInterimResult(interimTranscript)
-        }
-      }
-
-      recognition.onerror = (event: any) => {
-        if (event.error !== 'no-speech') {
-          console.error("Speech Recognition Error:", event.error)
-          setError("I didn't quite catch that. Try again?")
-        }
-        // Even on 'no-speech', we shouldn't necessarily stop listening if continuous is true
-        // But for predictable state, we stop it and let user tap again if needed.
-        setIsListening(false)
-        onListeningChange?.(false)
-      }
-
-      recognition.onend = () => {
-        setIsListening(false)
-        onListeningChange?.(false)
-      }
-
-      recognitionRef.current = recognition
-    } else {
-      setError("Voice search not supported in this browser.")
+    if (!SpeechRecognition) {
+      setError("Voice input is not supported in this browser. Please try Chrome or Edge.")
+      return
     }
-  }, [onResult, onListeningChange])
+
+    const recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      onListeningChangeRef.current?.(true)
+      setError(null)
+    }
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = ""
+      let finalTranscript = ""
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript
+        } else {
+          interimTranscript += event.results[i][0].transcript
+        }
+      }
+
+      if (finalTranscript) {
+        onResultRef.current(finalTranscript)
+      }
+      
+      if (interimTranscript && onInterimResultRef.current) {
+        onInterimResultRef.current(interimTranscript)
+      }
+    }
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech Recognition Error:", event.error)
+      
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setError("Microphone blocked. Please tap the 'Lock' icon in your browser address bar and choose 'Allow' for Microphone.")
+      } else if (event.error === 'network') {
+        setError("Internet issue. The speech service needs a connection to hear you correctly.")
+      } else if (event.error === 'aborted') {
+        // User or system aborted, not a real error
+      } else if (event.error !== 'no-speech') {
+        setError("I didn't quite catch that. Try again?")
+      }
+      
+      setIsListening(false)
+      onListeningChangeRef.current?.(false)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+      onListeningChangeRef.current?.(false)
+    }
+
+    recognitionRef.current = recognition
+
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort() } catch (e) {}
+      }
+    }
+  }, []) // Stable initialization
 
   const toggleListening = () => {
     if (isListening) {

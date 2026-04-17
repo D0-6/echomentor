@@ -101,30 +101,30 @@ export default function ScamDetectorPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+    <div className="fluid-container adaptive-p space-y-[clamp(1rem,4vw,3rem)] pb-32">
       {/* Editorial Header */}
       <section className="text-left py-6">
         <h2 className="editorial-display-lg mb-4 text-on-surface">
-          Stay safe from <span className="text-secondary text-on-tertiary-container">unseen threats.</span>
+          Stay safe from <span className="text-secondary text-primary">unseen threats.</span>
         </h2>
-        <p className="text-xl text-on-secondary-container max-w-xl leading-relaxed">
+        <p className="text-[clamp(1.1rem,2vw,1.4rem)] text-on-secondary-container max-w-xl leading-relaxed">
           Scan text messages, emails, or physical mail to identify potential scams before you take action.
         </p>
       </section>
 
-      {/* Main Analysis Sections Stack */}
-      <div className="flex flex-col gap-10">
+      {/* Main Analysis Sections Stack - Fluid gap */}
+      <div className="flex flex-col adaptive-gap">
         
         {/* Digital Scan Card */}
-        <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-sm border-none">
+        <div className="bg-surface-container-lowest adaptive-rounded adaptive-p shadow-sm border border-outline-variant/10">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold text-on-surface">Digital Message</h3>
-            <span className="text-xs font-bold text-on-secondary-container uppercase tracking-tight opacity-40">Scan Text or Email</span>
+            <h3 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-on-surface">Digital Message</h3>
+            <span className="text-[clamp(0.65rem,1vw,0.8rem)] font-bold text-on-secondary-container uppercase tracking-widest opacity-40">Scan Text or Email</span>
           </div>
-          <div className="bg-surface-container rounded-2xl p-6 min-h-[200px] mb-8 group ring-1 ring-outline-variant/10 focus-within:ring-primary transition-all">
+          <div className="bg-surface-container rounded-[clamp(1rem,2vw,1.5rem)] p-[clamp(1rem,2vw,1.5rem)] min-h-[clamp(180px,25vw,280px)] mb-8 group ring-1 ring-outline-variant/10 focus-within:ring-primary transition-all">
             <textarea 
               placeholder="Paste the suspicious text, link, or email content here..."
-              className="w-full h-full bg-transparent border-none focus:ring-0 text-lg text-on-surface placeholder:text-on-secondary-container/50 resize-none"
+              className="w-full h-full bg-transparent border-none focus:ring-0 text-[clamp(1rem,1.8vw,1.25rem)] text-on-surface placeholder:text-on-secondary-container/50 resize-none"
               value={digitalContent}
               onChange={(e) => setDigitalContent(e.target.value)}
             />
@@ -132,40 +132,40 @@ export default function ScamDetectorPage() {
           <button 
             disabled={isAnalyzing || !digitalContent.trim()}
             onClick={handleDigitalAnalyze}
-            className="w-full h-16 bg-primary text-on-primary rounded-2xl font-bold text-lg flex items-center justify-center gap-4 transition-all hover:opacity-90 active:scale-95 shadow-lg"
+            className="w-full h-[clamp(3.5rem,7vw,4.5rem)] bg-primary text-on-primary rounded-[clamp(1rem,2vw,1.5rem)] font-bold text-[clamp(1rem,1.8vw,1.25rem)] flex items-center justify-center gap-4 transition-all hover:opacity-90 active:scale-95 shadow-lg"
           >
-            <span className="material-symbols-outlined text-2xl">search</span>
+            <span className="material-symbols-outlined icon-sm">search</span>
             {isAnalyzing ? "Analyzing..." : "Confirm Safety"}
           </button>
         </div>
 
         {/* Physical Mail Scan Card (Dual Mode) */}
-        <div className="bg-surface-container-low rounded-3xl p-8 shadow-sm flex flex-col gap-8 relative overflow-hidden">
-          <div className="flex items-center gap-8">
-             <div className="w-20 h-20 bg-secondary-container rounded-2xl flex items-center justify-center text-primary flex-shrink-0">
-                <span className="material-symbols-outlined text-4xl">photo_camera</span>
+        <div className="bg-surface-container-low adaptive-rounded adaptive-p shadow-sm flex flex-col adaptive-gap relative overflow-hidden border border-outline-variant/5">
+          <div className="flex items-center adaptive-gap flex-wrap md:flex-nowrap">
+             <div className="w-[clamp(4.5rem,10vw,6rem)] h-[clamp(4.5rem,10vw,6rem)] bg-secondary-container rounded-[25%] flex items-center justify-center text-primary flex-shrink-0">
+                <span className="material-symbols-outlined icon-md">photo_camera</span>
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-on-surface mb-2">Physical Mail</h3>
-                <p className="text-lg text-on-secondary-container opacity-80">
+                <h3 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-on-surface mb-2">Physical Mail</h3>
+                <p className="text-[clamp(1rem,1.8vw,1.25rem)] text-on-secondary-container opacity-80 leading-relaxed">
                   Take a photo of a letter or upload an existing one to check for scams.
                 </p>
               </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 adaptive-gap">
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="h-16 bg-white dark:bg-surface-container-highest text-primary rounded-2xl font-black text-xl shadow-sm hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-3 border-2 border-primary/10"
+              className="h-[clamp(3.5rem,7vw,4.5rem)] bg-white dark:bg-surface-container-highest text-primary rounded-[clamp(1rem,2vw,1.5rem)] font-black text-[clamp(1rem,1.8vw,1.25rem)] shadow-sm hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-3 border-2 border-primary/10"
             >
-              <span className="material-symbols-outlined">photo_library</span>
+              <span className="material-symbols-outlined icon-sm">photo_library</span>
               From Gallery
             </button>
             <button 
-              onClick={() => fileInputRef.current?.click()} // On mobile, 'capture' works with clicking
-              className="h-16 bg-primary text-on-primary rounded-2xl font-black text-xl shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-3"
+              onClick={() => fileInputRef.current?.click()} 
+              className="h-[clamp(3.5rem,7vw,4.5rem)] bg-primary text-on-primary rounded-[clamp(1rem,2vw,1.5rem)] font-black text-[clamp(1rem,1.8vw,1.25rem)] shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-3"
             >
-              <span className="material-symbols-outlined">add_a_photo</span>
+              <span className="material-symbols-outlined icon-sm">add_a_photo</span>
               Take Photo
             </button>
             <input 
@@ -174,7 +174,6 @@ export default function ScamDetectorPage() {
               className="hidden" 
               accept="image/*" 
               onChange={handleImageChange}
-              // This ensures camera opens on mobile if supported
               capture="environment" 
             />
           </div>
@@ -182,34 +181,34 @@ export default function ScamDetectorPage() {
 
         {/* Results Display */}
         {result && (
-          <section className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+          <section className="space-y-[clamp(1rem,3vw,2rem)] animate-in fade-in slide-in-from-bottom-5 duration-700">
             <div className="flex items-center gap-4">
               <div className="h-px flex-1 bg-outline-variant/10"></div>
-              <span className="text-xs font-bold text-on-secondary-container uppercase tracking-widest opacity-40">Analysis Report</span>
+              <span className="text-[clamp(0.65rem,1vw,0.8rem)] font-bold text-on-secondary-container uppercase tracking-widest opacity-40 px-2">Analysis Report</span>
               <div className="h-px flex-1 bg-outline-variant/10"></div>
             </div>
 
             <div className={cn(
-              "rounded-3xl p-8 shadow-md border-l-8 relative overflow-hidden",
+              "adaptive-rounded adaptive-p shadow-md border-l-[clamp(8px,1.5vw,16px)] relative overflow-hidden",
               riskLevel === "high" ? "bg-error-container border-error" : 
               riskLevel === "medium" ? "bg-amber-50 border-amber-500" : "bg-surface-container-lowest border-primary"
             )}>
-               <div className="absolute top-6 right-8 px-4 py-1.5 bg-white/40 text-xs font-black rounded-full uppercase">
+               <div className="absolute top-6 right-8 px-4 py-1.5 bg-white/40 text-[clamp(0.65rem,1.2vw,0.8rem)] font-black rounded-full uppercase">
                  {riskLevel === "high" ? "High Risk" : riskLevel === "medium" ? "Caution" : "Likely Safe"}
                </div>
-               <div className="flex items-start gap-4 mb-6">
-                 <div className="w-14 h-14 bg-white/40 rounded-full flex items-center justify-center text-primary">
-                   <span className="material-symbols-outlined text-3xl">
+               <div className="flex items-start adaptive-gap mb-6">
+                 <div className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-white/40 rounded-full flex items-center justify-center text-primary">
+                   <span className="material-symbols-outlined icon-md">
                      {riskLevel === "high" ? "warning" : riskLevel === "medium" ? "report_problem" : "verified"}
                    </span>
                  </div>
                  <div>
-                   <h4 className="text-2xl font-bold">Safety Assessment</h4>
-                   <p className="text-on-secondary-container font-medium">Checked for hidden scam markers</p>
+                   <h4 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold leading-tight">Safety Assessment</h4>
+                   <p className="text-[clamp(0.9rem,1.5vw,1.1rem)] text-on-secondary-container font-medium">Checked for hidden scam markers</p>
                  </div>
                </div>
-               <div className="bg-white/60 rounded-2xl p-6">
-                 <p className="text-lg text-on-surface leading-relaxed whitespace-pre-wrap">{result}</p>
+               <div className="bg-white/60 rounded-[clamp(1rem,2vw,1.5rem)] p-[clamp(1rem,2vw,1.5rem)]">
+                 <p className="text-[clamp(1rem,1.8vw,1.25rem)] text-on-surface leading-relaxed whitespace-pre-wrap">{result}</p>
                </div>
             </div>
           </section>
@@ -218,7 +217,7 @@ export default function ScamDetectorPage() {
 
       {/* Philosophy Quote */}
       <section className="max-w-2xl border-t border-outline-variant/10 pt-12 mt-12">
-        <p className="text-2xl font-headline italic text-on-surface-variant leading-snug">
+        <p className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-headline italic text-on-surface-variant leading-snug">
           "Technology moves fast, but safety moves with intention. We're here to provide the space for you to pause and verify."
         </p>
       </section>

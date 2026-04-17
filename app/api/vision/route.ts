@@ -3,6 +3,11 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.NVIDIA_NIM_API_KEY) {
+      console.error("FATAL: NVIDIA_NIM_API_KEY is not set in environment variables")
+      return NextResponse.json({ error: "Server configuration error: AI service key is missing." }, { status: 500 });
+    }
+
     const { image, imageUrl, prompt } = await req.json();
     const finalImageUrl = image || imageUrl;
 

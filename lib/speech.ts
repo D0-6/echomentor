@@ -82,20 +82,40 @@ export async function speak(text: string, characterId: string, speed: number = 0
     const parsed = JSON.parse(text)
     if (parsed.result) cleanText = parsed.result
     if (parsed.analysis) cleanText = parsed.analysis
-    if (parsed.error) return
+    // Only block if there is an ACTUAL error string, not just an error field being null/false
+    if (parsed.error && typeof parsed.error === "string") return
   } catch (e) { /* not JSON, use as-is */ }
+
+  if (!cleanText || cleanText.trim().length === 0) return
 
   window.speechSynthesis.cancel()
 
-  // Ensure voices are loaded (async on some browsers)
+  // Ensure voices are loaded (async on some browsers, especially mobile)
   let voices = loadVoices()
   if (voices.length === 0) {
     await new Promise<void>(resolve => {
-      window.speechSynthesis.onvoiceschanged = () => {
+      // Primary: listen for the browser event
+      const handler = () => {
         loadVoices()
         resolve()
       }
-      setTimeout(resolve, 1000) // timeout fallback
+      window.speechSynthesis.onvoiceschanged = handler
+
+      // Secondary: poll every 250ms as a fallback (some browsers never fire the event)
+      let attempts = 0
+      const poll = setInterval(() => {
+        const v = window.speechSynthesis.getVoices()
+        attempts++
+        if (v.length > 0) {
+          cachedVoices = v
+          clearInterval(poll)
+          resolve()
+        }
+        if (attempts > 12) { // 3 seconds max
+          clearInterval(poll)
+          resolve()
+        }
+      }, 250)
     })
   }
 
@@ -111,4 +131,19 @@ export async function speak(text: string, characterId: string, speed: number = 0
   utterance.rate = character.rate * speed
 
   window.speechSynthesis.speak(utterance)
+}
+
+/**
+ * Unlocks the speech engine on mobile browsers.
+ * Browsers like Safari and Chrome on iOS require a direct user gesture 
+ * to start any audio/speech. By calling this on a button click, 
+ * we "prime" the engine so that async AI responses can speak immediately.
+ */
+export function warmupSpeech() {
+  if (typeof window === "undefined" || !window.speechSynthesis) return
+  
+  // Create an empty, silent utterance
+  const silent = new SpeechSynthesisUtterance("")
+  silent.volume = 0
+  window.speechSynthesis.speak(silent)
 }

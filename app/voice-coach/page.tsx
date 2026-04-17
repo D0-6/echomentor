@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
-import { speak } from "@/lib/speech"
+import { speak, warmupSpeech } from "@/lib/speech"
 
 export default function VoiceCoachPage() {
   const { voiceCharacterId, voiceSpeed } = useAccessibility()
@@ -16,7 +16,7 @@ export default function VoiceCoachPage() {
   const [coachTip, setCoachTip] = React.useState("I'm ready when you are. Tap the microphone and start speaking.")
   const [isThinking, setIsThinking] = React.useState(false)
 
-  const handleAnalysis = async (text: string) => {
+  const handleAnalysis = React.useCallback(async (text: string) => {
     setTranscript(text)
     setInterimTranscript("")
     setIsThinking(true)
@@ -66,28 +66,35 @@ export default function VoiceCoachPage() {
     } finally {
       setIsThinking(false)
     }
-  }
+  }, [voiceCharacterId, voiceSpeed])
+
+  const handleListeningChange = React.useCallback((listening: boolean) => {
+    setIsListening(listening)
+    if (listening) {
+      setInterimTranscript("")
+    }
+  }, [])
 
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
+    <div className="fluid-container adaptive-p space-y-[clamp(1rem,4vw,3rem)]">
       {/* Editorial Header */}
       <section className="text-left py-6">
         <h2 className="editorial-display-lg mb-4 text-on-surface">
           How can I help <span className="text-secondary">you</span> today?
         </h2>
-        <p className="text-xl text-on-secondary-container max-w-xl leading-relaxed">
+        <p className="text-[clamp(1.1rem,2vw,1.4rem)] text-on-secondary-container max-w-xl leading-relaxed">
           I'm listening closely. Share your thoughts, or just practice your speech with me.
         </p>
       </section>
 
-      {/* The "Voice Canvas" Layout */}
-      <div className="flex flex-col md:flex-row gap-8 items-stretch mb-20 px-1">
+      {/* The "Voice Canvas" Layout - Fluid mathematically */}
+      <div className="flex flex-wrap lg:flex-nowrap adaptive-gap items-stretch mb-20 px-1">
         
         {/* Large Transcription Area */}
-        <div className="flex-grow bg-surface-container-lowest rounded-3xl p-10 shadow-sm min-h-[320px] flex flex-col justify-center relative overflow-hidden group">
-          <span className="text-sm text-on-secondary-container mb-4 font-bold tracking-widest uppercase opacity-60">Live Transcription</span>
-          <p className="font-headline text-[1.75rem] md:text-[2.25rem] leading-snug font-bold text-on-surface">
+        <div className="flex-grow bg-surface-container-lowest adaptive-rounded adaptive-p shadow-sm min-h-[clamp(250px,30vw,380px)] flex flex-col justify-center relative overflow-hidden group border border-outline-variant/10">
+          <span className="text-[clamp(0.7rem,1.2vw,0.8rem)] text-on-secondary-container mb-4 font-bold tracking-widest uppercase opacity-60">Live Transcription</span>
+          <p className="font-headline text-[clamp(1.5rem,3.5vw,2.5rem)] leading-snug font-bold text-on-surface">
             {isListening && interimTranscript ? (
               <span className="opacity-50 italic">"{interimTranscript}..."</span>
             ) : (
@@ -96,7 +103,7 @@ export default function VoiceCoachPage() {
           </p>
           
           {/* Waveform Visualization */}
-          <div className="mt-8 flex gap-1.5 h-10 items-center">
+          <div className="mt-8 flex gap-[clamp(4px,0.8vw,8px)] h-[clamp(2.5rem,5vw,4rem)] items-center">
             {[3, 5, 8, 6, 4, 7, 5, 2, 6, 9, 7, 4].map((h, i) => (
               <div 
                 key={i} 
@@ -104,24 +111,27 @@ export default function VoiceCoachPage() {
                   "waveform-bar",
                   isListening ? "animate-pulse" : "opacity-40"
                 )} 
-                style={{ height: `${h * 4}px` }} 
+                style={{ 
+                  height: `${h * 10}%`,
+                  width: 'clamp(4px, 0.8vw, 12px)'
+                }} 
               />
             ))}
           </div>
         </div>
 
         {/* AI Response "Coach Tip" Bubble */}
-        <div className="w-full md:w-80 bg-surface-container-high rounded-3xl p-8 flex flex-col justify-between border-l-8 border-primary shadow-sm min-h-[200px]">
+        <div className="w-full lg:w-[clamp(300px,25vw,400px)] bg-surface-container-high adaptive-rounded adaptive-p flex flex-col justify-between border-l-[clamp(8px,1.5vw,16px)] border-primary shadow-sm min-h-[200px]">
           <div>
-            <span className="material-symbols-outlined text-primary mb-4 text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-            <h3 className="font-headline text-xl font-bold mb-3">Coach Tip</h3>
-            <p className="text-on-secondary-container leading-relaxed">
+            <span className="material-symbols-outlined text-primary mb-4 icon-lg" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+            <h3 className="font-headline text-[clamp(1.25rem,2.5vw,1.75rem)] font-bold mb-3">Coach Tip</h3>
+            <p className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container leading-relaxed">
               {coachTip}
             </p>
           </div>
           <div className="mt-6 flex items-center gap-2">
-            <span className={cn("w-2.5 h-2.5 rounded-full bg-primary", (isListening || isThinking) && "animate-pulse")} />
-            <span className="text-sm font-bold text-primary uppercase tracking-wider">
+            <span className={cn("w-[clamp(10px,1.5vw,14px)] h-[clamp(10px,1.5vw,14px)] rounded-full bg-primary", (isListening || isThinking) && "animate-pulse")} />
+            <span className="text-[clamp(0.75rem,1.2vw,0.9rem)] font-bold text-primary uppercase tracking-wider">
               {isListening ? "Listening..." : isThinking ? "Thinking..." : "Ready"}
             </span>
           </div>
@@ -129,16 +139,19 @@ export default function VoiceCoachPage() {
       </div>
 
       {/* Hero Microphone Control (Tactile Target) */}
-      <div className="flex flex-col items-center justify-center gap-6 pb-20">
+      <div className="flex flex-col items-center justify-center gap-[clamp(1.5rem,4vw,3rem)] pb-20">
         <div className="relative">
           <button 
-            onClick={() => setIsListening(!isListening)}
+            onClick={() => {
+              warmupSpeech() // DEPLOYMENT FIX: unlock TTS on user gesture
+              setIsListening(!isListening)
+            }}
             className={cn(
-              "group relative w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 z-10",
+              "group relative w-[clamp(7rem,20vw,12rem)] h-[clamp(7rem,20vw,12rem)] rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 z-10",
               isListening ? "bg-error text-on-error" : "bg-primary text-on-primary"
             )}
           >
-            <span className="material-symbols-outlined text-6xl md:text-7xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span className="material-symbols-outlined text-[clamp(3.5rem,10vw,6rem)]" style={{ fontVariationSettings: "'FILL' 1" }}>
               {isListening ? "pause_circle" : "record_voice_over"}
             </span>
           </button>
@@ -146,15 +159,15 @@ export default function VoiceCoachPage() {
           {/* Animated Halo Rings for Listening State */}
           {isListening && (
             <>
-              <div className="absolute inset-0 rounded-full border-4 border-error opacity-20 animate-ping" />
-              <div className="absolute inset-0 rounded-full border-2 border-error opacity-40 scale-110" />
+              <div className="absolute inset-0 rounded-full border-[clamp(4px,1vw,8px)] border-error opacity-20 animate-ping" />
+              <div className="absolute inset-0 rounded-full border-[clamp(2px,0.5vw,4px)] border-error opacity-40 scale-110" />
             </>
           )}
         </div>
         
         <div className="text-center">
-          <p className="font-extrabold text-2xl mb-1">{isListening ? "Tap to Pause" : "Tap to Speak"}</p>
-          <p className="text-on-secondary-container text-lg font-medium">
+          <p className="font-extrabold text-[clamp(1.5rem,3vw,2.25rem)] mb-1 leading-tight">{isListening ? "Tap to Pause" : "Tap to Speak"}</p>
+          <p className="text-on-secondary-container text-[clamp(1rem,1.5vw,1.25rem)] font-medium">
             {isListening ? "EchoMentor is listening..." : "I'm ready when you are."}
           </p>
         </div>
@@ -163,12 +176,7 @@ export default function VoiceCoachPage() {
       <VoiceInput 
         onResult={handleAnalysis} 
         onInterimResult={setInterimTranscript}
-        onListeningChange={(listening) => {
-          setIsListening(listening)
-          if (listening) {
-            setInterimTranscript("")
-          }
-        }}
+        onListeningChange={handleListeningChange}
         isListening={isListening}
         className="hidden"
       />
