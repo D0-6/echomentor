@@ -100,7 +100,10 @@ export function VoiceInput({
     }
 
     recognition.onerror = (event: any) => {
-      console.error("Speech Recognition Error:", event.error)
+      // no-speech is a normal lifecycle event, don't log it as an error
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.error("Speech Recognition Error:", event.error)
+      }
       
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         setError("Microphone blocked. Please tap the 'Lock' icon in your browser address bar and choose 'Allow' for Microphone.")

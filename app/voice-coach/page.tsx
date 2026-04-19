@@ -8,9 +8,13 @@ import { cn } from "@/lib/utils"
 import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
 import { speak, warmupSpeech } from "@/lib/speech"
+import { getPersonalNimResponse } from "@/lib/ai-client"
 
 export default function VoiceCoachPage() {
-  const { voiceCharacterId, voiceSpeed } = useAccessibility()
+  const { 
+    voiceCharacterId, voiceSpeed,
+    userName, userAge, healthIssues, nvidiaApiKey 
+  } = useAccessibility()
   const [isListening, setIsListening] = React.useState(false)
   const [transcript, setTranscript] = React.useState("Practice your greeting, or share your thoughts with me.")
   const [interimTranscript, setInterimTranscript] = React.useState("")
@@ -24,50 +28,30 @@ export default function VoiceCoachPage() {
     setCoachTip("Thinking...")
     
     try {
-      const character = CHARACTERS.find(c => c.id === voiceCharacterId) || CHARACTERS[0]
-      const systemPrompt = character.role === "mentor"
-        ? `You are ${character.name}, a wise and patient mentor. Give 2-3 sentences of encouraging, calm feedback in your unique tone. If the user asks how to do something or requests a tutorial, include a YouTube link using this format: [YOUTUBE: search terms here]. Pick senior-friendly search terms.`
-        : `You are ${character.name}, a kind and tech-savvy grandchild. Give 2-3 sentences of loving, bright feedback to your grandparent in your unique tone. If they ask how to do something or want to learn, include a YouTube link using this format: [YOUTUBE: search terms here]. Pick beginner-friendly search terms.`;
+      const profile = { name: userName, age: userAge, healthIssues, apiKey: nvidiaApiKey }
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        body: JSON.stringify({ 
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `The user says: "${text}"` }
-          ]
-        }),
-      })
-      
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error("No reader")
-      const decoder = new TextDecoder()
+      const stream = await getPersonalNimResponse(
+        [{ role: "user", content: `This is a voice exercise. Listen to what I said and give me one short, helpful tip to improve my speech or just a kind word: "${transcript}"` }],
+        profile
+      );
+
       let fullContent = ""
-      
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fullContent += decoder.decode(value)
-        
-        // Remove error JSON from text if it accidentally appeared
-        let cleanText = fullContent
-        try {
-          const parsed = JSON.parse(fullContent)
-          if (parsed.error) cleanText = "I'm having a little trouble connecting right now."
-        } catch(e) {}
-        
-        setCoachTip(cleanText)
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        fullContent += content;
+        setCoachTip(fullContent)
       }
 
       speak(fullContent, voiceCharacterId, voiceSpeed)
-
-    } catch (e) {
-      setCoachTip("I had a little trouble processing that. You're doing great though, keep practicing!")
-      speak("I had a little trouble processing that. You're doing great though, keep practicing!", voiceCharacterId, voiceSpeed)
+    } catch (e: any) {
+      console.error("Coach Error:", e)
+      setCoachTip(e.message?.includes("API Key") 
+        ? "I need a 'Brain' to help you! Please go to Settings and enter your NVIDIA API Key." 
+        : "I had a little trouble processing that. You're doing great though!")
     } finally {
       setIsThinking(false)
     }
-  }, [voiceCharacterId, voiceSpeed])
+  }, [voiceCharacterId, voiceSpeed, userName, userAge, healthIssues, nvidiaApiKey])
 
   const handleListeningChange = React.useCallback((listening: boolean) => {
     setIsListening(listening)

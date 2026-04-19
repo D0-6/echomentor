@@ -8,6 +8,8 @@ import { useAccessibility } from "@/providers/AccessibilityProvider"
 import { CHARACTERS } from "@/lib/characters"
 import { speak, warmupSpeech } from "@/lib/speech"
 import { SAFETY_AUDIT_PROMPT } from "@/lib/prompts"
+import { getPersonalNimResponse, getPersonalNimVisionResponse } from "@/lib/ai-client"
+import { processMessageIntents } from "@/lib/native-actions"
 
 interface Message {
   id: string
@@ -18,7 +20,10 @@ interface Message {
 }
 
 export default function MasterAssistantPage() {
-  const { voiceCharacterId, voiceSpeed, windowSize } = useAccessibility()
+  const { 
+    voiceCharacterId, voiceSpeed, windowSize,
+    userName, userAge, healthIssues, nvidiaApiKey 
+  } = useAccessibility()
 
   const [messages, setMessages] = React.useState<Message[]>([])
   const [isListening, setIsListening] = React.useState(false)
@@ -77,58 +82,52 @@ export default function MasterAssistantPage() {
     setIsTyping(true)
 
     try {
-      const character = CHARACTERS.find(c => c.id === voiceCharacterId) || CHARACTERS[0]
-      const systemPrompt = character.personality
-
-      let endpoint = "/api/chat"
-      let body: any = { 
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages.map(m => ({ role: m.role, content: m.content })),
-          { role: "user", content: text }
-        ]
+      const profile = {
+        name: userName,
+        age: userAge,
+        healthIssues: healthIssues,
+        apiKey: nvidiaApiKey
       }
 
       if (type === "image") {
-        endpoint = "/api/vision"
-        body = { image: metadata.base64, prompt: SAFETY_AUDIT_PROMPT }
-      }
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: JSON.stringify(body)
-      })
-
-      if (type === "image") {
-        const data = await response.json()
-        const aiMsg: Message = { id: (Date.now() + 1).toString(), role: "assistant", type: "text", content: data.analysis }
+        const analysis = await getPersonalNimVisionResponse(metadata.base64, SAFETY_AUDIT_PROMPT, profile) || "I'm sorry, I couldn't analyze that photo. Please try again.";
+        const aiMsg: Message = { id: (Date.now() + 1).toString(), role: "assistant", type: "text", content: analysis }
         setMessages(prev => [...prev, aiMsg])
-        speak(data.analysis, voiceCharacterId, voiceSpeed)
+        speak(analysis, voiceCharacterId, voiceSpeed)
       } else {
-        const reader = response.body?.getReader()
-        if (!reader) throw new Error("No reader")
-        const decoder = new TextDecoder()
+        const stream = await getPersonalNimResponse(
+          messages.map(m => ({ role: m.role, content: m.content })).concat({ role: "user", content: text }),
+          profile
+        );
+
         let assistantMsgContent = ""
-        
         const assistantId = (Date.now() + 1).toString()
         setMessages(prev => [...prev, { id: assistantId, role: "assistant", type: "text", content: "" }])
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const chunk = decoder.decode(value)
-          assistantMsgContent += chunk
-          
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content || "";
+          assistantMsgContent += content;
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: assistantMsgContent } : m))
         }
+
         speak(assistantMsgContent, voiceCharacterId, voiceSpeed)
+        // Process any native intents (Calls, Open App, etc.)
+        processMessageIntents(assistantMsgContent)
       }
-    } catch (e) {
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: "assistant", type: "text", content: "I'm sorry, I'm having trouble connecting to my brain right now. Please try again." }])
+    } catch (e: any) {
+      console.error("AI Error:", e)
+      setMessages(prev => [...prev, { 
+        id: Date.now().toString(), 
+        role: "assistant", 
+        type: "text", 
+        content: e.message?.includes("API Key") 
+          ? "I need a 'Brain' to think! Please go to Settings and enter your NVIDIA API Key." 
+          : "I'm sorry, I'm having trouble connecting to my brain right now. Please try again." 
+      }])
     } finally {
       setIsTyping(false)
     }
-  }, [messages, voiceCharacterId, voiceSpeed])
+  }, [messages, voiceCharacterId, voiceSpeed, userName, userAge, healthIssues, nvidiaApiKey])
 
   const handleFileUpload = React.useCallback((e: React.ChangeEvent<HTMLInputElement>, type: "image" | "pdf") => {
     const file = e.target.files?.[0]
@@ -255,6 +254,31 @@ export default function MasterAssistantPage() {
             >
               <span className="material-symbols-outlined icon-md">add_a_photo</span>
             </button>
+            
+            {/* NEW: Guide Me Button (Vision Assistant) */}
+            <button 
+              onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'image/*'
+                input.onchange = (e) => {
+                  const file = (e.target as any).files?.[0]
+                  if (!file) return
+                  const reader = new FileReader()
+                  reader.onloadend = () => {
+                    handleSendMessage("Can you guide me on what to do next? Here is my screen.", "image", { base64: reader.result })
+                  }
+                  reader.readAsDataURL(file)
+                }
+                input.click()
+              }}
+              className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-secondary-container rounded-[clamp(1rem,2vw,1.5rem)] flex items-center justify-center text-secondary hover:bg-secondary hover:text-on-secondary transition-all shadow-sm active:scale-90 border-2 border-secondary/20"
+              aria-label="Guide Me"
+              title="Help me with my screen"
+            >
+              <span className="material-symbols-outlined icon-md" style={{ fontVariationSettings: "'FILL' 1" }}>visibility</span>
+            </button>
+
              <button 
               onClick={() => {
                 const input = document.createElement('input')

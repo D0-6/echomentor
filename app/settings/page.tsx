@@ -14,7 +14,11 @@ export default function SettingsPage() {
     reducedMotion, setReducedMotion,
     brightness, setBrightness,
     voiceCharacterId, setVoiceCharacterId,
-    voiceSpeed, setVoiceSpeed
+    voiceSpeed, setVoiceSpeed,
+    userName, setUserName,
+    userAge, setUserAge,
+    healthIssues, setHealthIssues,
+    nvidiaApiKey, setNvidiaApiKey
   } = useAccessibility()
 
   const mentors = CHARACTERS.filter(c => c.role === "mentor")
@@ -200,6 +204,90 @@ export default function SettingsPage() {
 
 
 
+
+        {/* Personal Profile Section */}
+        <div className="bg-surface-container-low adaptive-rounded adaptive-p shadow-sm border border-outline-variant/5 space-y-8">
+           <div className="flex items-center adaptive-gap mb-4">
+              <div className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-primary-container rounded-[20%] flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined icon-md">badge</span>
+              </div>
+              <div>
+                <h3 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-on-surface mb-1">Personal Profile</h3>
+                <p className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container opacity-80 leading-snug">Personalize how EchoMentor talks to you.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 adaptive-gap">
+               <div className="space-y-3">
+                  <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Display Name</label>
+                  <input 
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Your Name"
+                    className="w-full p-[clamp(1rem,2vw,1.25rem)] rounded-[clamp(1rem,2vw,1.5rem)] bg-surface-container-high border border-outline-variant/10 focus:border-primary outline-none text-[clamp(1rem,1.8vw,1.25rem)] shadow-inner"
+                  />
+               </div>
+               <div className="space-y-3">
+                  <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Age</label>
+                  <input 
+                    type="number"
+                    value={userAge}
+                    onChange={(e) => setUserAge(e.target.value)}
+                    placeholder="Age"
+                    className="w-full p-[clamp(1rem,2vw,1.25rem)] rounded-[clamp(1rem,2vw,1.5rem)] bg-surface-container-high border border-outline-variant/10 focus:border-primary outline-none text-[clamp(1rem,1.8vw,1.25rem)] shadow-inner"
+                  />
+               </div>
+               <div className="md:col-span-2 space-y-3">
+                  <label className="text-xs font-black uppercase tracking-widest opacity-40 ml-2">Health Conditions (Optional)</label>
+                  <textarea 
+                    value={healthIssues}
+                    onChange={(e) => setHealthIssues(e.target.value)}
+                    placeholder="E.g. Vision issues, mobility help needed..."
+                    className="w-full p-[clamp(1rem,2vw,1.25rem)] rounded-[clamp(1rem,2vw,1.5rem)] bg-surface-container-high border border-outline-variant/10 focus:border-primary outline-none text-[clamp(1rem,1.8vw,1.25rem)] min-h-[120px] shadow-inner"
+                  />
+               </div>
+            </div>
+        </div>
+
+        {/* Brain Connection (API Key) */}
+        <div className="bg-surface-container-lowest adaptive-rounded adaptive-p shadow-sm border border-outline-variant/10 space-y-8">
+            <div className="flex items-center adaptive-gap mb-4">
+              <div className="w-[clamp(3.5rem,7vw,4.5rem)] h-[clamp(3.5rem,7vw,4.5rem)] bg-secondary-container rounded-[20%] flex items-center justify-center text-secondary">
+                <span className="material-symbols-outlined icon-md">psychology</span>
+              </div>
+              <div>
+                <h3 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-on-surface mb-1">Brain Connection</h3>
+                <p className="text-[clamp(1rem,1.8vw,1.2rem)] text-on-secondary-container opacity-80 leading-snug">Managing your personal NVIDIA AI Key.</p>
+              </div>
+            </div>
+
+            <div className="p-[clamp(1rem,2vw,1.5rem)] bg-primary-container/10 rounded-[clamp(1rem,2vw,1.5rem)] border border-primary/20 space-y-4">
+               <div className="flex gap-4">
+                  <span className="material-symbols-outlined text-primary">info</span>
+                  <div className="text-[clamp(0.9rem,1.5vw,1.1rem)] leading-relaxed">
+                    EchoMentor uses <b>NVIDIA NIM</b> to process your requests privately. This key is saved only on this device.
+                  </div>
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-2">NVIDIA API Key</label>
+                  <div className="relative">
+                    <input 
+                      type="password"
+                      value={nvidiaApiKey}
+                      onChange={(e) => setNvidiaApiKey(e.target.value)}
+                      placeholder="nvapi-..."
+                      className="w-full p-[clamp(1rem,2vw,1.25rem)] rounded-[clamp(1rem,2vw,1.5rem)] bg-white dark:bg-surface-container border border-outline-variant/20 focus:border-secondary outline-none text-[clamp(1rem,1.8vw,1.25rem)] font-mono shadow-sm"
+                    />
+                    {nvidiaApiKey && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-success font-black text-[10px] uppercase">
+                        <span className="material-symbols-outlined text-xs">verified</span> Active
+                      </div>
+                    )}
+                  </div>
+               </div>
+            </div>
+        </div>
 
         {/* Voice Auditor — shows all device voices */}
         <VoiceAuditor />

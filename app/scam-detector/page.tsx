@@ -4,7 +4,13 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { SAFETY_AUDIT_PROMPT } from "@/lib/prompts"
 
+import { getPersonalNimResponse, getPersonalNimVisionResponse } from "@/lib/ai-client"
+import { useAccessibility } from "@/providers/AccessibilityProvider"
+
 export default function ScamDetectorPage() {
+  const { 
+    userName, userAge, healthIssues, nvidiaApiKey 
+  } = useAccessibility()
   const [digitalContent, setDigitalContent] = React.useState("")
   const [isAnalyzing, setIsAnalyzing] = React.useState(false)
   const [result, setResult] = React.useState<string | null>(null)
@@ -32,25 +38,20 @@ export default function ScamDetectorPage() {
     setRiskLevel(null)
     
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        body: JSON.stringify({ 
-          messages: [
-            { role: "system", content: SAFETY_AUDIT_PROMPT },
-            { role: "user", content: `Please analyze this digital message: ${digitalContent}` }
-          ]
-        }),
-      })
+      const profile = { name: userName, age: userAge, healthIssues, apiKey: nvidiaApiKey }
+
+      const stream = await getPersonalNimResponse(
+        [
+          { role: "system", content: SAFETY_AUDIT_PROMPT },
+          { role: "user", content: `Please analyze this digital message: ${digitalContent}` }
+        ],
+        profile
+      );
       
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error("No reader")
-      const decoder = new TextDecoder()
       let fullContent = ""
-      
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fullContent += decoder.decode(value)
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        fullContent += content;
         setResult(fullContent)
         
         const lowerRes = fullContent.toLowerCase()
@@ -58,9 +59,10 @@ export default function ScamDetectorPage() {
         else if (lowerRes.includes("[status]: caution") || lowerRes.includes("medium risk")) setRiskLevel("medium")
         else if (lowerRes.includes("[status]: safe") || lowerRes.includes("low risk")) setRiskLevel("low")
       }
-
-    } catch (error) {
-      setResult("I couldn't analyze the message. Please try again or ask a family member.")
+    } catch (error: any) {
+      setResult(error.message?.includes("API Key") 
+        ? "I need a 'Brain' to help you! Please go to Settings and enter your NVIDIA API Key." 
+        : "I couldn't analyze the message. Please try again.")
       setRiskLevel("high")
     } finally {
       setIsAnalyzing(false)
@@ -73,26 +75,20 @@ export default function ScamDetectorPage() {
     setRiskLevel(null)
     
     try {
-      const response = await fetch("/api/vision", {
-        method: "POST",
-        body: JSON.stringify({ 
-          image: imageData,
-          prompt: SAFETY_AUDIT_PROMPT
-        }),
-      })
+      const profile = { name: userName, age: userAge, healthIssues, apiKey: nvidiaApiKey }
+      const analysis = await getPersonalNimVisionResponse(imageData, SAFETY_AUDIT_PROMPT, profile);
       
-      const data = await response.json()
-      if (data.error) throw new Error(data.error)
+      setResult(analysis)
       
-      setResult(data.analysis)
-      
-      const lowerRes = data.analysis.toLowerCase()
+      const lowerRes = (analysis || "").toLowerCase()
       if (lowerRes.includes("[status]: scam") || lowerRes.includes("high risk")) setRiskLevel("high")
       else if (lowerRes.includes("[status]: caution") || lowerRes.includes("medium risk")) setRiskLevel("medium")
       else if (lowerRes.includes("[status]: safe") || lowerRes.includes("low risk")) setRiskLevel("low")
 
-    } catch (error) {
-      setResult("I couldn't read the photo. Please try taking a brighter picture or asking a family member.")
+    } catch (error: any) {
+      setResult(error.message?.includes("API Key") 
+        ? "I need a 'Brain' to help you! Please go to Settings and enter your NVIDIA API Key." 
+        : "I couldn't read the photo. Please try again.")
       setRiskLevel("high")
     } finally {
       setIsAnalyzing(false)

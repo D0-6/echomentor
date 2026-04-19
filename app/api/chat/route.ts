@@ -1,24 +1,47 @@
-import { getNimResponse } from "@/lib/nim";
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    // DEPLOYMENT FIX: Fail fast with a clear message if the API key is missing
-    if (!process.env.NVIDIA_NIM_API_KEY) {
-      console.error("FATAL: NVIDIA_NIM_API_KEY is not set in environment variables")
-      return NextResponse.json(
-        { error: "Server configuration error: AI service key is missing. Please set NVIDIA_NIM_API_KEY." }, 
-        { status: 500 }
-      );
-    }
+    const { messages, apiKey } = await req.json();
 
-    const { messages } = await req.json();
+    if (!apiKey) {
+      return NextResponse.json({ error: "Missing NVIDIA API Key" }, { status: 400 });
+    }
 
     if (!messages) {
       return NextResponse.json({ error: "Missing messages" }, { status: 400 });
     }
 
-    const stream = await getNimResponse(messages);
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      baseURL: 'https://integrate.api.nvidia.com/v1',
+    });
+
+    // TRY-CATCH for the stream creation to handle fallback
+    let stream;
+    try {
+      stream = await openai.chat.completions.create({
+        model: "meta/llama-3.3-70b-instruct",
+        messages,
+        temperature: 0.6,
+        max_tokens: 500,
+        stream: true,
+      });
+    } catch (e: any) {
+      if (e.status === 403 || e.status === 404) {
+        console.log("70B Model failed or forbidden. Trying 8B fallback...");
+        stream = await openai.chat.completions.create({
+          model: "meta/llama-3.1-8b-instruct",
+          messages,
+          temperature: 0.6,
+          max_tokens: 500,
+          stream: true,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     // Standard Web Stream for Next.js 15
     const readableStream = new ReadableStream({
@@ -38,8 +61,8 @@ export async function POST(req: Request) {
         "Content-Type": "text/plain; charset=utf-8",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("API Chat Error:", error);
-    return NextResponse.json({ error: "Failed to fetch response from NVIDIA NIM" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to fetch response from NVIDIA NIM" }, { status: 500 });
   }
 }

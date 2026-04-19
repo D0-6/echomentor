@@ -15,6 +15,11 @@ interface AccessibilityContextType {
   voiceSpeed: number
   isEmergencyOpen: boolean
   windowSize: WindowSize
+  // PERSONALIZATION FIELDS
+  userName: string
+  userAge: string
+  healthIssues: string
+  nvidiaApiKey: string
   setHighContrast: (val: boolean) => void
   setTextScale: (val: TextScale) => void
   setReducedMotion: (val: boolean) => void
@@ -22,6 +27,10 @@ interface AccessibilityContextType {
   setVoiceCharacterId: (val: string) => void
   setVoiceSpeed: (val: number) => void
   setIsEmergencyOpen: (val: boolean) => void
+  setUserName: (val: string) => void
+  setUserAge: (val: string) => void
+  setHealthIssues: (val: string) => void
+  setNvidiaApiKey: (val: string) => void
 }
 
 const AccessibilityContext = React.createContext<AccessibilityContextType | undefined>(undefined)
@@ -35,6 +44,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   const [voiceSpeed, setVoiceSpeed] = React.useState(0.95)
   const [isEmergencyOpen, setIsEmergencyOpen] = React.useState(false)
   const [isLoaded, setIsLoaded] = React.useState(false)
+
+  // Personalization
+  const [userName, setUserName] = React.useState("")
+  const [userAge, setUserAge] = React.useState("")
+  const [healthIssues, setHealthIssues] = React.useState("")
+  const [nvidiaApiKey, setNvidiaApiKey] = React.useState("")
   
   const windowSize = useWindowSize()
 
@@ -50,6 +65,10 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
         setBrightness(parsed.brightness ?? 100)
         setVoiceCharacterId(parsed.voiceCharacterId ?? "martha")
         setVoiceSpeed(parsed.voiceSpeed ?? 0.95)
+        setUserName(parsed.userName ?? "")
+        setUserAge(parsed.userAge ?? "")
+        setHealthIssues(parsed.healthIssues ?? "")
+        setNvidiaApiKey(parsed.nvidiaApiKey ?? "")
       } catch (e) {
         console.error("Failed to parse accessibility settings", e)
       }
@@ -61,7 +80,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   React.useEffect(() => {
     if (!isLoaded) return
 
-    const settings = { highContrast, textScale, reducedMotion, brightness, voiceCharacterId, voiceSpeed }
+    const settings = { 
+      highContrast, textScale, reducedMotion, brightness, 
+      voiceCharacterId, voiceSpeed, 
+      userName, userAge, healthIssues, nvidiaApiKey 
+    }
     localStorage.setItem("echomentor-accessibility", JSON.stringify(settings))
 
     const html = document.documentElement
@@ -96,7 +119,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       setBrightness,
       setVoiceCharacterId,
       setVoiceSpeed,
-      setIsEmergencyOpen
+      setIsEmergencyOpen,
+      userName, setUserName,
+      userAge, setUserAge,
+      healthIssues, setHealthIssues,
+      nvidiaApiKey, setNvidiaApiKey
     }}>
       {children}
       <EmergencyOverlay 

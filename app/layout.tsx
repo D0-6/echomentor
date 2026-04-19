@@ -6,6 +6,7 @@ import { SideNavBar } from "@/components/SideNavBar";
 import { TopAppBar } from "@/components/TopAppBar";
 import { MobileNavBar } from "@/components/MobileNavBar";
 import { MentorGuide } from "@/components/MentorGuide";
+import { Onboarding } from "@/components/Onboarding";
 import { AccessibilityProvider } from "@/providers/AccessibilityProvider";
 
 import { BrightnessOverlay } from "@/components/BrightnessOverlay";
@@ -50,6 +51,7 @@ export default function RootLayout({
             <MentorGuide />
             <MobileNavBar />
             <BrightnessOverlay />
+            <Onboarding />
           </AccessibilityProvider>
         </ThemeProvider>
       </body>
